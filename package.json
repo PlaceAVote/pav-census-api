@@ -4,7 +4,8 @@
   "description": "A Node Api to expose census data",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --recursive"
+    "test": "gulp check",
+    "start": "node index.js"
   },
   "repository": {
     "type": "git",
@@ -31,6 +32,8 @@
     "eslint-plugin-react": "^5.1.1",
     "gulp": "^3.9.1",
     "gulp-eslint": "^2.0.0",
+    "gulp-mocha": "^2.2.0",
+    "gulp-sequence": "^0.4.5",
     "mocha": "^2.4.5"
   },
   "dependencies": {
