@@ -18,9 +18,8 @@ const populationOptions = {
 
 const populationDataReader = population(populationOptions);
 
-const billController = bill({ populationDataReader: populationDataReader });
-
 logger.info('Initialising Controllers');
+const billController = bill({ populationDataReader: populationDataReader });
 
 logger.info('Initialising Server');
 app.use(applicationLogger('combined'));
