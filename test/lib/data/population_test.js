@@ -1,8 +1,8 @@
+/* eslint-disable */
 'use strict';
-
+/* eslint-enable */
 const expect = require('chai').expect;
 const population = require('../../../lib/data/population.js');
-const mysql = require('mysql');
 
 describe('Population', () => {
   describe('Has functions', () => {
@@ -31,29 +31,25 @@ describe('Population', () => {
     it('calls connection with correct params', (done) => {
       let string;
       const connection = {
-        connect: () => {},
-        end: () => {},
         query: (select, callback) => {
-         string = select;
-         return callback();
+          string = select;
+          return callback();
         },
-      }
-      const subject = population({connection: connection, table: 'census_data'});
-      subject.byDistrict('California', 6, (err, result) => {
+      };
+      const subject = population({ connection: connection, table: 'census_data' });
+      subject.byDistrict('California', 6, (err) => {
         expect(err).to.eql(null);
-        expect(string).to.eql(`SELECT population FROM census_data WHERE state = 'California' AND district = 6`);
+        expect(string).to.eql('SELECT population FROM census_data WHERE state = \'California\' AND district = 6');
         done();
       });
     });
     it('returns an error from sql in the outer callback', (done) => {
       const connection = {
-        connect: () => {},
-        end: () => {},
         query: (select, callback) => {
-         return callback(new Error('SQL ERROR'));
+          return callback(new Error('SQL ERROR'));
         },
-      }
-      const subject = population({connection: connection, table: 'census_data'});
+      };
+      const subject = population({ connection: connection, table: 'census_data' });
       subject.byDistrict('California', 6, (err, result) => {
         expect(err.message).to.eql('SQL ERROR');
         expect(result).to.eql(null);
@@ -62,13 +58,11 @@ describe('Population', () => {
     });
     it('returns the sum of population from each row', (done) => {
       const connection = {
-        connect: () => {},
-        end: () => {},
         query: (select, callback) => {
-         return callback(null, [{population: 10}, {population:20}]);
+          return callback(null, [{ population: 10 }, { population: 20 }]);
         },
-      }
-      const subject = population({connection: connection, table: 'census_data'});
+      };
+      const subject = population({ connection: connection, table: 'census_data' });
       subject.byDistrict('California', 6, (err, result) => {
         expect(err).to.eql(null);
         expect(result).to.eql(30);
