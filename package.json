@@ -1,0 +1,39 @@
+{
+  "name": "pav-census-api",
+  "version": "1.0.0",
+  "description": "A Node Api to expose census data",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PlaceAVote/pav-census-api.git"
+  },
+  "keywords": [
+    "Place",
+    "A",
+    "Vote",
+    "Census",
+    "Data"
+  ],
+  "author": "PlaceAVote",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/PlaceAVote/pav-census-api/issues"
+  },
+  "homepage": "https://github.com/PlaceAVote/pav-census-api#readme",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "eslint-config-airbnb": "^9.0.1",
+    "eslint-plugin-import": "^1.8.0",
+    "eslint-plugin-jsx-a11y": "^1.2.0",
+    "eslint-plugin-react": "^5.1.1",
+    "gulp": "^3.9.1",
+    "gulp-eslint": "^2.0.0",
+    "mocha": "^2.4.5"
+  },
+  "dependencies": {
+    "express": "^4.13.4"
+  }
+}
