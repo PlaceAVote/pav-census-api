@@ -1,6 +1,4 @@
-/* eslint-disable */
 'use strict';
-/* eslint-enable */
 const expect = require('chai').expect;
 const billController = require('../../../lib/controllers/bill.js');
 
