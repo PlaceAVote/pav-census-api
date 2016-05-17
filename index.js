@@ -7,7 +7,7 @@ const defaults = require('./lib/config/defaults.js');
 const population = require('./lib/data/population.js');
 const bill = require('./lib/controllers/bill.js');
 const port = process.env.PORT || 3000;
-const logger = defaults.logger();
+const logger = defaults.logger().get('Application::Container');
 
 
 logger.info('Initialising Data Readers');
