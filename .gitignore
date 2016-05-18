@@ -1,3 +1,4 @@
 node_modules/*
 *.swp
 scripts/*temp*
+lib/config/config.js

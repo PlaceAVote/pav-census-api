@@ -5,6 +5,8 @@ const host = process.argv[process.argv.length-3];
 const user = process.argv[process.argv.length-2];
 const password = process.argv[process.argv.length-1];
 
+console.log(`Setting Host ${host}, ${user} and ${password}`);
+
 const config = {
   host: host,
   user: user,
