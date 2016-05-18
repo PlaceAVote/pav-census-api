@@ -1,3 +1,6 @@
+machine:
+  node:
+    version: 6.2.0
 dependencies:
   pre:
     - curl -Ls https://install.convox.com/linux.zip > /tmp/convox.zip
