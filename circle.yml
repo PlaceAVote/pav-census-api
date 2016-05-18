@@ -7,12 +7,6 @@ dependencies:
     - sudo unzip /tmp/convox.zip -d /usr/local/bin
   post:
     - "sudo pip install awscli==1.7.43"
-deployment:
-  development:
-    branch: master
-    commands:
-      - "bash ./scripts/compile.sh"
-  release:
-    tag: /v[0-9]+(\.[0-9]+)*/
-    commands:
-      - "echo no prod release yet"
+test:
+  pre:
+    - "bash ./scripts/compile.sh"
