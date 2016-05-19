@@ -1,5 +1,6 @@
 const routes = {
-  bill: '/bill',
+  bill: '/demographic',
+  health: '/health',
 };
 
 module.exports = routes;
