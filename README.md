@@ -34,7 +34,7 @@ _Request_
 **Path**
 
 ```
-  /bill
+  /demographic
 ```
 
 **QueryParams**
