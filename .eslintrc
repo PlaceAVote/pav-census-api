@@ -16,6 +16,7 @@
     "describe": true,
     "it": true,
     "global-require": true,
+    "xit": true,
     "beforeEach": true,
     "afterEach": true,
     "browser": true,

@@ -12,7 +12,7 @@ const logger = defaults.logger().get('Application::Container');
 
 logger.info('Initialising Data Readers');
 const populationOptions = {
-  connection: defaults.connection(),
+  connection: defaults.census(),
   table: config.population.table,
 };
 
