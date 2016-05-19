@@ -47,7 +47,7 @@ describe('Bill Controller', () => {
       const mockReq = {
         query: {
           billId: 'id',
-          state: 'California',
+          state: 'CA',
         },
       };
       const mockRes = {
@@ -61,7 +61,7 @@ describe('Bill Controller', () => {
     });
     it('returns 500 if population data has failed', () => {
       const mockPopulationDataReader = {
-        byDistrict: (state, district, callback) => {
+        byDistrict: (query, callback) => {
           return callback(new Error('Population Error'));
         },
       };
@@ -69,7 +69,7 @@ describe('Bill Controller', () => {
       const mockReq = {
         query: {
           billId: 'id',
-          state: 'California',
+          state: 'CA',
           district: 6,
         },
       };
@@ -83,8 +83,10 @@ describe('Bill Controller', () => {
       expect(mockRes.statusCode).to.eql(500);
     });
     it('returns population in body is no error from population', () => {
+      let receivedQuery;
       const mockPopulationDataReader = {
-        byDistrict: (state, district, callback) => {
+        byDistrict: (query, callback) => {
+          receivedQuery = query;
           return callback(null, 20);
         },
       };
@@ -92,17 +94,23 @@ describe('Bill Controller', () => {
       const mockReq = {
         query: {
           billId: 'id',
-          state: 'California',
+          state: 'CA',
           district: 6,
         },
       };
       const mockRes = {
         send: (b) => {
-          expect(b).to.eql({ population: 20 });
+          expect(b).to.eql({
+            demographics: {
+              population: 20,
+            },
+          });
         },
       };
       expect(mockRes.statusCode).to.eql(undefined);
       subject.getCensusData(mockReq, mockRes);
+      expect(receivedQuery.state).to.eql('CA');
+      expect(receivedQuery.billId).to.eql('id');
     });
   });
 });

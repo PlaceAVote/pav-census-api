@@ -12,7 +12,7 @@ describe('Population', () => {
   describe('byDistrict', () => {
     it('returns null is state not defined', (done) => {
       const subject = population();
-      subject.byDistrict(undefined, '6', (err, result) => {
+      subject.byDistrict({ state: undefined, district: '6' }, (err, result) => {
         expect(err.message).to.eql('No State Defined');
         expect(result).to.eql(null);
         done();
@@ -20,7 +20,7 @@ describe('Population', () => {
     });
     it('returns null is district not defined', (done) => {
       const subject = population();
-      subject.byDistrict('California', undefined, (err, result) => {
+      subject.byDistrict({ state: 'CA', district: undefined }, (err, result) => {
         expect(err.message).to.eql('No District Defined');
         expect(result).to.eql(null);
         done();
@@ -35,9 +35,9 @@ describe('Population', () => {
         },
       };
       const subject = population({ connection: connection, table: 'census_data' });
-      subject.byDistrict('California', 6, (err) => {
+      subject.byDistrict({ state: 'CA', district: 6 }, (err) => {
         expect(err).to.eql(null);
-        expect(string).to.eql('SELECT population FROM census_data WHERE state = \'California\' AND district = 6');
+        expect(string).to.eql('SELECT population FROM census_data WHERE state = \'CA\' AND district = 6');
         done();
       });
     });
@@ -48,7 +48,7 @@ describe('Population', () => {
         },
       };
       const subject = population({ connection: connection, table: 'census_data' });
-      subject.byDistrict('California', 6, (err, result) => {
+      subject.byDistrict({ state: 'CA', district: 6 }, (err, result) => {
         expect(err.message).to.eql('SQL ERROR');
         expect(result).to.eql(null);
         done();
@@ -61,7 +61,7 @@ describe('Population', () => {
         },
       };
       const subject = population({ connection: connection, table: 'census_data' });
-      subject.byDistrict('California', 6, (err, result) => {
+      subject.byDistrict({ state: 'CA', district: 6 }, (err, result) => {
         expect(err).to.eql(null);
         expect(result).to.eql(30);
         done();
