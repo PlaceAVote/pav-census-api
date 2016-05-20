@@ -8,7 +8,9 @@
         "dev": {
           "target": "http://censusdev.placeavote.com",
           "phases": [
-            {"duration": 300, "arrivalRate": 50}
+            {"duration": 120, "arrivalRate": 5, "ramp": 15, "name": "warm up"},
+            {"pause": 10},
+            {"duration": 30, "arrivalRate": 15, "ramp": 30, "name": "bust"}
           ]
         }
       },
