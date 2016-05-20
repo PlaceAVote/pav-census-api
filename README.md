@@ -84,7 +84,7 @@ _Response_
         ranges: [
           {
             minAge: 45,
-            maxAge: 24,
+            maxAge: 60,
             votes: {
               total: 100,
               yes: 90,
