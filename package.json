@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "gulp check",
-    "start": "node index.js"
+    "start": "node index.js",
+    "coverage": "istanbul cover _mocha test/lib/**/*.js -- -R spec"
   },
   "repository": {
     "type": "git",
@@ -34,6 +35,7 @@
     "gulp-eslint": "^2.0.0",
     "gulp-mocha": "^2.2.0",
     "gulp-sequence": "^0.4.5",
+    "istanbul": "^0.4.3",
     "mocha": "^2.4.5",
     "mustache": "^2.2.1"
   },
