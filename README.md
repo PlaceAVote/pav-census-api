@@ -46,10 +46,11 @@ _Request_
   * district
 
 _Response_
- // Work in Progress
+ // Work in Progress - Example Response
 ```
   {
     population: 4815,
+    sampleSize: 1623
     votes: {
       yes: 2342,
       no: 108,
@@ -57,14 +58,41 @@ _Response_
     },
     gender: {
       male: {
-        total: 1600,
-        // age range tbc.
+        votes: {
+          total: 1600,
+          yes: 800,
+          no: 800,
+        },
+        ranges: [
+          {
+            minAge: 18,
+            maxAge: 24,
+            votes: {
+              total: 100,
+              yes: 30,
+              no: 70,
+            }
+          }
+        ]
       },
       female: {
-        total: 850,
-        // age range tbc.
+        votes: {
+          total: 850,
+          yes: 600,
+          no: 250,
+        },
+        ranges: [
+          {
+            minAge: 45,
+            maxAge: 24,
+            votes: {
+              total: 100,
+              yes: 90,
+              no: 10,
+            }
+          }
+        ]
       }
     }
-    sampleSize: 1623
   }
 ```
