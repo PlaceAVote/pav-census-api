@@ -7,7 +7,7 @@ const defaults = require('./lib/config/defaults.js');
 const population = require('./lib/data/population.js');
 const count = require('./lib/data/count.js');
 const bill = require('./lib/controllers/bill.js');
-const port = process.env.PORT || 10011;
+const port = process.env.PORT || 5000;
 const logger = defaults.logger().get('Application::Container');
 
 
