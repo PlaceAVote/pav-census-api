@@ -1,0 +1,46 @@
+{
+   "config":{
+      "target": "http://localhost:5000",
+      "phases": [
+        { "duration": 60, "arrivalRate": 20}
+      ],
+      "environments": {
+        "dev": {
+          "target": "http://censusdev.placeavote.com",
+          "phases": [
+            {"duration": 300, "arrivalRate": 50}
+          ]
+        }
+      },
+      "variables":{
+         "billId":[
+            "35801",
+            "99501",
+            "85001",
+            "94203",
+            "90210"
+         ],
+         "state":[
+            "CA"
+         ],
+         "district":[
+            "1",
+            "33",
+            "45",
+            "66",
+            "3"
+         ]
+      }
+   },
+   "scenarios": [
+    {
+      "flow": [
+        {
+          "get": {
+            "url":"/demographic?billId={{ billId }}&state={{ state }}&district={{ district }}"
+          }
+        }
+      ]
+    }
+  ]
+}
