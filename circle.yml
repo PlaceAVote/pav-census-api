@@ -10,3 +10,12 @@ dependencies:
 test:
   pre:
     - "bash ./scripts/compile.sh"
+deployment:
+  development:
+    branch: master
+    commands:
+      - "bash ./scripts/compile.sh"
+      - "rm -rf node_modules"
+      - convox login $CONVOX_GRID_HOST --password $CONVOX_API_KEY
+      - convox switch development
+      - convox deploy
