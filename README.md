@@ -1,6 +1,6 @@
 ## PlaceAVote Census API
 
-https://circleci.com/gh/:PlaceAVote/:pav-census-api.png?circle-token=:circle-token
+[![CircleCI](https://circleci.com/gh/PlaceAVote/pav-census-api.svg?style=svg)](https://circleci.com/gh/PlaceAVote/pav-census-api)
 
 A Node Api to expose demographic data
 
