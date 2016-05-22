@@ -59,6 +59,25 @@ describe('Bill Controller', () => {
       subject.getCensusData(mockReq, mockRes);
       expect(mockRes.statusCode).to.eql(400);
     });
+
+    it('returns 400 if district is not an int', () => {
+      const subject = billController();
+      const mockReq = {
+        query: {
+          billId: 'id',
+          state: 'CA',
+          district: 'cantParseMe',
+        },
+      };
+      const mockRes = {
+        send: (b) => {
+          expect(b).to.eql({ message: 'Invalid Request' });
+        },
+      };
+      expect(mockRes.statusCode).to.eql(undefined);
+      subject.getCensusData(mockReq, mockRes);
+      expect(mockRes.statusCode).to.eql(400);
+    });
     it('returns 500 if count data has failed', () => {
       const mockPopulationDataReader = {
         byDistrict: (query, callback) => {
@@ -129,7 +148,7 @@ describe('Bill Controller', () => {
       const mockCountDataReader = {
         byDistrict: (query, callback) => {
           receivedCountQuery = query;
-          return callback(null, { yes: 100, no: 30, total: 130 });
+          return callback(null, { yes: 100, no: 30, total: 130, male: 50, maleYes: 20, maleNo: 30, female: 70, femaleYes: 20, femaleNo: 50, nonBinary: 10, nonBinaryYes: 10, nonBinaryNo: 0 });
         },
       };
       const subject = billController({ populationDataReader: mockPopulationDataReader, countDataReader:
@@ -150,6 +169,29 @@ describe('Bill Controller', () => {
               no: 30,
               total: 130,
             },
+            gender: {
+              male: {
+                votes: {
+                  yes: 20,
+                  no: 30,
+                  total: 50,
+                },
+              },
+              female: {
+                votes: {
+                  yes: 20,
+                  no: 50,
+                  total: 70,
+                },
+              },
+              nonBinary: {
+                votes: {
+                  yes: 10,
+                  no: 0,
+                  total: 10,
+                },
+              },
+            },
           });
         },
       };
@@ -161,6 +203,120 @@ describe('Bill Controller', () => {
       expect(receivedCountQuery.state).to.eql('CA');
       expect(receivedCountQuery.billId).to.eql('id');
       expect(receivedCountQuery.district).to.eql(6);
+    });
+    it('returns empty votes if null or undefined is returned from data reader', () => {
+      const mockPopulationDataReader = {
+        byDistrict: (query, callback) => {
+          return callback(null, 20);
+        },
+      };
+      const mockCountDataReader = {
+        byDistrict: (query, callback) => {
+          return callback(null, null);
+        },
+      };
+      const subject = billController({ populationDataReader: mockPopulationDataReader, countDataReader: mockCountDataReader });
+      const mockReq = {
+        query: {
+          billId: 'id',
+          state: 'CA',
+          district: 6,
+        },
+      };
+      const mockRes = {
+        send: (b) => {
+          expect(b).to.eql({
+            population: 20,
+            votes: {
+              yes: 0,
+              no: 0,
+              total: 0,
+            },
+            gender: {
+              male: {
+                votes: {
+                  yes: 0,
+                  no: 0,
+                  total: 0,
+                },
+              },
+              female: {
+                votes: {
+                  yes: 0,
+                  no: 0,
+                  total: 0,
+                },
+              },
+              nonBinary: {
+                votes: {
+                  yes: 0,
+                  no: 0,
+                  total: 0,
+                },
+              },
+            },
+          });
+        },
+      };
+      expect(mockRes.statusCode).to.eql(undefined);
+      subject.getCensusData(mockReq, mockRes);
+    });
+    it('returns demographics in body when they\'re no errors', () => {
+      const mockPopulationDataReader = {
+        byDistrict: (query, callback) => {
+          return callback(null, 20);
+        },
+      };
+      const mockCountDataReader = {
+        byDistrict: (query, callback) => {
+          return callback(null, {});
+        },
+      };
+      const subject = billController({ populationDataReader: mockPopulationDataReader, countDataReader: mockCountDataReader });
+      const mockReq = {
+        query: {
+          billId: 'id',
+          state: 'CA',
+          district: 6,
+        },
+      };
+      const mockRes = {
+        send: (b) => {
+          expect(b).to.eql({
+            population: 20,
+            votes: {
+              yes: 0,
+              no: 0,
+              total: 0,
+            },
+            gender: {
+              male: {
+                votes: {
+                  yes: 0,
+                  no: 0,
+                  total: 0,
+                },
+              },
+              female: {
+                votes: {
+                  yes: 0,
+                  no: 0,
+                  total: 0,
+                },
+              },
+              nonBinary: {
+                votes: {
+                  yes: 0,
+                  no: 0,
+                  total: 0,
+                },
+              },
+            },
+          });
+        },
+      };
+      expect(mockRes.statusCode).to.eql(undefined);
+      subject.getCensusData(mockReq, mockRes);
     });
   });
 });
