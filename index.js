@@ -2,6 +2,7 @@ const express = require('express');
 const applicationLogger = require('morgan');
 const routes = require('./routes');
 const sampler = require('sample-population');
+const sqlinjection = require('sql-injection');
 const app = express();
 const config = require('./lib/config/config.js');
 const defaults = require('./lib/config/defaults.js');
@@ -34,6 +35,7 @@ const billController = bill({
 });
 
 logger.info('Initialising Server');
+app.use(sqlinjection);
 app.use(applicationLogger('combined'));
 app.get(routes.bill, (req, response) => {
   billController.getCensusData(req, response);
