@@ -47,6 +47,7 @@
     "morgan": "^1.7.0",
     "mysql": "^2.10.2",
     "sample-population": "^1.0.2",
+    "sql-injection": "0.0.5",
     "winston": "^2.2.0"
   }
 }
