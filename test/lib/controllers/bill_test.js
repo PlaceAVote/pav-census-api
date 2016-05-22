@@ -59,6 +59,25 @@ describe('Bill Controller', () => {
       subject.getCensusData(mockReq, mockRes);
       expect(mockRes.statusCode).to.eql(400);
     });
+
+    it('returns 400 if district is not an int', () => {
+      const subject = billController();
+      const mockReq = {
+        query: {
+          billId: 'id',
+          state: 'CA',
+          district: 'cantParseMe',
+        },
+      };
+      const mockRes = {
+        send: (b) => {
+          expect(b).to.eql({ message: 'Invalid Request' });
+        },
+      };
+      expect(mockRes.statusCode).to.eql(undefined);
+      subject.getCensusData(mockReq, mockRes);
+      expect(mockRes.statusCode).to.eql(400);
+    });
     it('returns 500 if count data has failed', () => {
       const mockPopulationDataReader = {
         byDistrict: (query, callback) => {
