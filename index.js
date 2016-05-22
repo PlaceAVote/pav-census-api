@@ -1,6 +1,7 @@
 const express = require('express');
 const applicationLogger = require('morgan');
 const routes = require('./routes');
+const sampler = require('sample-population');
 const app = express();
 const config = require('./lib/config/config.js');
 const defaults = require('./lib/config/defaults.js');
@@ -26,7 +27,11 @@ const userOptions = {
 const countDataReader = count(userOptions);
 
 logger.info('Initialising Controllers');
-const billController = bill({ populationDataReader: populationDataReader, countDataReader: countDataReader });
+const billController = bill({
+  populationDataReader: populationDataReader,
+  countDataReader: countDataReader,
+  sampler: sampler,
+});
 
 logger.info('Initialising Server');
 app.use(applicationLogger('combined'));
