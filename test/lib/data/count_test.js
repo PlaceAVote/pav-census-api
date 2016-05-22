@@ -58,12 +58,18 @@ describe('Count', () => {
         billId: 'hr2014-12',
       };
       subject.byDistrict(params, (err) => {
-        const select = `SELECT COUNT(u1.user_id) AS total_votes,
-        COUNT(yv.user_id) AS total_yes_votes,
-        COUNT(nv.user_id) AS total_no_votes,
-        COUNT(m1.user_id) AS total_male_votes,
-        COUNT(f1.user_id) AS total_female_votes,
-        COUNT(t1.user_id) AS total_non_binary_votes
+        const select = `SELECT COUNT(u1.user_id) AS total,
+        COUNT(yv.user_id) AS yes,
+        COUNT(nv.user_id) AS no,
+        COUNT(m1.user_id) AS male,
+        COUNT(f1.user_id) AS female,
+        COUNT(t1.user_id) AS nonBinary,
+        COUNT(m2.user_id) AS maleYes,
+        COUNT(m3.user_id) AS maleNo,
+        COUNT(f2.user_id) AS femaleYes,
+        COUNT(f3.user_id) AS femaleNo,
+        COUNT(t2.user_id) AS nonBinaryYes,
+        COUNT(t3.user_id) AS nonBinaryNo
         FROM ${options.votes} AS v1
         JOIN ${options.info} AS u1 ON v1.bill_id='${params.billId}' AND v1.user_id=u1.user_id AND
         u1.state='${params.state}' AND u1.district='${params.district}'
@@ -76,14 +82,26 @@ describe('Count', () => {
         LEFT JOIN ${options.info} AS yv ON v1.user_id=yv.user_id AND yv.state='${params.state}' AND
         yv.district='${params.district}' AND v1.vote=1
         LEFT JOIN ${options.info} AS nv ON v1.user_id=nv.user_id AND nv.state='${params.state}' AND
-        nv.district='${params.district}' AND v1.vote=0;`;
+        nv.district='${params.district}' AND v1.vote=0
+        LEFT JOIN ${options.info} AS m2 ON v1.user_id=m2.user_id AND m2.state='${params.state}' AND
+        m2.district='${params.district}' AND v1.vote=1 AND m2.gender='male'
+        LEFT JOIN ${options.info} AS m3 ON v1.user_id=m3.user_id AND m3.state='${params.state}' AND
+        m3.district='${params.district}' AND v1.vote=0 AND m3.gender='male'
+        LEFT JOIN ${options.info} AS f2 ON v1.user_id=f2.user_id AND f2.state='${params.state}' AND
+        f2.district='${params.district}' AND v1.vote=1 AND f2.gender='female'
+        LEFT JOIN ${options.info} AS f3 ON v1.user_id=f3.user_id AND f3.state='${params.state}' AND
+        f3.district='${params.district}' AND v1.vote=0 AND f3.gender='female'
+        LEFT JOIN ${options.info} AS t2 ON v1.user_id=t2.user_id AND t2.state='${params.state}' AND
+        t2.district='${params.district}' AND v1.vote=1 AND t2.gender='they'
+        LEFT JOIN ${options.info} AS t3 ON v1.user_id=t3.user_id AND t3.state='${params.state}' AND
+        t3.district='${params.district}' AND v1.vote=0 AND t3.gender='female';`;
         expect(err).to.eql(null);
         expect(string).to.eql(select);
         done();
       });
     });
 
-    it('returns no rows from the sql backend', (done) => {
+    it('returns no rows from the sql backend will return empty object', (done) => {
       const connection = {
         query: (select, callback) => {
           return callback(null);
@@ -103,13 +121,13 @@ describe('Count', () => {
       };
       subject.byDistrict(params, (err, result) => {
         expect(err).to.eql(null);
-        expect(result).to.eql({ yes: 0, no: 0, total: 0, male: 0, female: 0, nonBinary: 0 });
+        expect(result).to.eql({});
         expect();
         done();
       });
     });
 
-    it('returns zero values when an unexpected row is returned from the sql backend', (done) => {
+    it('returns emptry object if that is whats returned from sql backend', (done) => {
       const connection = {
         query: (select, callback) => {
           return callback(null, [{}]);
@@ -129,7 +147,7 @@ describe('Count', () => {
       };
       subject.byDistrict(params, (err, result) => {
         expect(err).to.eql(null);
-        expect(result).to.eql({ yes: 0, no: 0, total: 0, male: 0, female: 0, nonBinary: 0 });
+        expect(result).to.eql({});
         expect();
         done();
       });
@@ -149,7 +167,7 @@ describe('Count', () => {
       });
     });
 
-    it('returns the count of votes in a hash of yes no as zero when theres no results', (done) => {
+    it('returns empty object if theres no items in the returned array', (done) => {
       const connection = {
         query: (select, callback) => {
           return callback(null, []);
@@ -158,7 +176,7 @@ describe('Count', () => {
       const subject = count({ connection: connection, table: 'census_data' });
       subject.byDistrict({ state: 'CA', district: 6, billId: 'billId' }, (err, result) => {
         expect(err).to.eql(null);
-        expect(result).to.eql({ yes: 0, no: 0, total: 0, male: 0, female: 0, nonBinary: 0 });
+        expect(result).to.eql({});
         done();
       });
     });
@@ -166,13 +184,15 @@ describe('Count', () => {
     it('returns the count returns from the sql query', (done) => {
       const connection = {
         query: (select, callback) => {
-          return callback(null, [{ total_votes: 12, total_yes_votes: 8, total_no_votes: 4, total_male_votes: 2, total_female_votes: 3, total_non_binary_votes: 7 }]);
+          return callback(null, [{ total: 12, yes: 8, no: 4, male: 2, female: 3, nonBinary: 7, maleYes: 1, maleNo: 1,
+            femaleYes: 1, femaleNo: 2, nonBinaryYes: 5, nonBinaryNo: 2 }]);
         },
       };
       const subject = count({ connection: connection, table: 'census_data' });
       subject.byDistrict({ state: 'CA', district: 6, billId: 'billId' }, (err, result) => {
         expect(err).to.eql(null);
-        expect(result).to.eql({ total: 12, yes: 8, no: 4, male: 2, female: 3, nonBinary: 7 });
+        expect(result).to.eql({ total: 12, yes: 8, no: 4, male: 2, female: 3, nonBinary: 7, maleYes: 1, maleNo: 1,
+            femaleYes: 1, femaleNo: 2, nonBinaryYes: 5, nonBinaryNo: 2 });
         done();
       });
     });
