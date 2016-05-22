@@ -2,6 +2,12 @@
 const expect = require('chai').expect;
 const billController = require('../../../lib/controllers/bill.js');
 
+const mockSampler = {
+  population: () => {
+    return 0;
+  }
+};
+
 describe('Bill Controller', () => {
   describe('Has Functions', () => {
     it('getCensusData', () => {
@@ -151,8 +157,11 @@ describe('Bill Controller', () => {
           return callback(null, { yes: 100, no: 30, total: 130, male: 50, maleYes: 20, maleNo: 30, female: 70, femaleYes: 20, femaleNo: 50, nonBinary: 10, nonBinaryYes: 10, nonBinaryNo: 0 });
         },
       };
-      const subject = billController({ populationDataReader: mockPopulationDataReader, countDataReader:
-        mockCountDataReader });
+      const subject = billController({
+        populationDataReader: mockPopulationDataReader,
+        countDataReader: mockCountDataReader,
+        sampler: mockSampler,
+      });
       const mockReq = {
         query: {
           billId: 'id',
@@ -164,6 +173,7 @@ describe('Bill Controller', () => {
         send: (b) => {
           expect(b).to.eql({
             population: 20,
+            sampleSize: 0,
             votes: {
               yes: 100,
               no: 30,
@@ -215,7 +225,11 @@ describe('Bill Controller', () => {
           return callback(null, null);
         },
       };
-      const subject = billController({ populationDataReader: mockPopulationDataReader, countDataReader: mockCountDataReader });
+      const subject = billController({
+        populationDataReader: mockPopulationDataReader,
+        countDataReader: mockCountDataReader,
+        sampler: mockSampler,
+      });
       const mockReq = {
         query: {
           billId: 'id',
@@ -227,6 +241,7 @@ describe('Bill Controller', () => {
         send: (b) => {
           expect(b).to.eql({
             population: 20,
+            sampleSize: 0,
             votes: {
               yes: 0,
               no: 0,
@@ -272,7 +287,11 @@ describe('Bill Controller', () => {
           return callback(null, {});
         },
       };
-      const subject = billController({ populationDataReader: mockPopulationDataReader, countDataReader: mockCountDataReader });
+      const subject = billController({
+        populationDataReader: mockPopulationDataReader,
+        countDataReader: mockCountDataReader,
+        sampler: mockSampler,
+      });
       const mockReq = {
         query: {
           billId: 'id',
@@ -284,6 +303,7 @@ describe('Bill Controller', () => {
         send: (b) => {
           expect(b).to.eql({
             population: 20,
+            sampleSize: 0,
             votes: {
               yes: 0,
               no: 0,
