@@ -1,7 +1,6 @@
 'use strict';
 const expect = require('chai').expect;
 const count = require('../../../lib/data/count.js');
-const defaults = require('../../../lib/config/defaults.js');
 
 describe('Count', () => {
   describe('Has functions', () => {

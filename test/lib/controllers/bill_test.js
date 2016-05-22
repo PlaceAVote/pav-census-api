@@ -5,7 +5,7 @@ const billController = require('../../../lib/controllers/bill.js');
 const mockSampler = {
   population: () => {
     return 0;
-  }
+  },
 };
 
 describe('Bill Controller', () => {
