@@ -3,10 +3,7 @@ const eslint = require('gulp-eslint');
 const mocha = require('gulp-mocha');
 const gulpSequence = require('gulp-sequence');
 const util = require('util');
-const mochaPhantomJS = require('gulp-mocha-phantomjs');
-const istanbulReport = require('gulp-istanbul-report');
-const coverageFile = './coverage/coverage.json';
-
+const istanbul = require('gulp-istanbul');
 
 gulp.task('lint', () =>
   gulp.src(['*.js', 'lib/**/*.js', 'test/**/*.js', 'test/*.js'])
@@ -27,20 +24,18 @@ gulp.task('check', (done) => {
   });
 });
 
-const mochaPhantomOpts = {
-  phantomjs: {
-    hooks: 'mocha-phantomjs-istanbul',
-    coverageFile: coverageFile,
-  },
-};
+gulp.task('pre-testCoverage', () => {
+  return gulp.src('lib/**/*.js')
+          .pipe(istanbul({
+            includeUntested: true
+          }))
+          .pipe(istanbul.hookRequire());
+});
 
-gulp.task('cover', () => {
-  gulp.src('test-runner.html', { read: false })
-  .pipe(mochaPhantomJS(mochaPhantomOpts))
-  .on('finish', () => {
-    gulp.src(coverageFile)
-    .pipe(istanbulReport());
-  });
+gulp.task('cover', ['pre-testCoverage'], () => {
+  return gulp.src('test/**/*.js')
+         .pipe(mocha())
+         .pipe(istanbul.writeReports());
 });
 
 gulp.task('default', ['check']);

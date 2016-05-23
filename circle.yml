@@ -7,10 +7,12 @@ dependencies:
     - sudo unzip /tmp/convox.zip -d /usr/local/bin
   post:
     - "sudo pip install awscli==1.7.43"
-    - "bash <(curl -s https://codecov.io/bash) -t f2b4f236-b2cf-44e9-8c39-b9613e378959"
 test:
   pre:
     - "bash ./scripts/compile.sh"
+    - "gulp cover"
+  post:
+    - "bash <(curl -s https://codecov.io/bash) -t f2b4f236-b2cf-44e9-8c39-b9613e378959"
 deployment:
   development:
     branch: master
