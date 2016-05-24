@@ -167,9 +167,14 @@ describe('Bill Controller', () => {
           return callback(null, { yes: 100, no: 30, total: 130, male: 50, maleYes: 20, maleNo: 30, female: 70, femaleYes: 20, femaleNo: 50, nonBinary: 10, nonBinaryYes: 10, nonBinaryNo: 0 });
         },
       };
+      let called = false;
       const mockCache = {
         get: (key, cb) => {
           cb(null);
+        },
+        set: (params, cb) => {
+          called = true;
+          cb();
         },
       };
       const subject = billController({
@@ -229,6 +234,7 @@ describe('Bill Controller', () => {
       expect(receivedCountQuery.state).to.eql('CA');
       expect(receivedCountQuery.billId).to.eql('id');
       expect(receivedCountQuery.district).to.eql(6);
+      expect(called).to.eql(true);
     });
     it('returns empty votes if null or undefined is returned from data reader', () => {
       const mockPopulationDataReader = {
@@ -238,6 +244,9 @@ describe('Bill Controller', () => {
       };
       const mockCache = {
         get: (key, cb) => {
+          cb(null);
+        },
+        set: (params, cb) => {
           cb(null);
         },
       };
@@ -311,6 +320,9 @@ describe('Bill Controller', () => {
       };
       const mockCache = {
         get: (key, cb) => {
+          cb(null);
+        },
+        set: (params, cb) => {
           cb(null);
         },
       };
@@ -437,6 +449,156 @@ describe('Bill Controller', () => {
       expect(mockRes.statusCode).to.eql(undefined);
       subject.getCensusData(mockReq, mockRes);
       expect(expectedKey).to.eql('CA-id-6');
+      done();
+    });
+    it('returns an object even if failing to write to the cache', (done) => {
+      const mockPopulationDataReader = {
+        byDistrict: (query, callback) => {
+          return callback(null, 20);
+        },
+      };
+      const mockCountDataReader = {
+        byDistrict: (query, callback) => {
+          return callback(null, {});
+        },
+      };
+      const data = {
+        population: 20,
+        sampleSize: 0,
+        votes: {
+          yes: 0,
+          no: 0,
+          total: 0,
+        },
+        gender: {
+          male: {
+            votes: {
+              yes: 0,
+              no: 0,
+              total: 0,
+            },
+          },
+          female: {
+            votes: {
+              yes: 0,
+              no: 0,
+              total: 0,
+            },
+          },
+          nonBinary: {
+            votes: {
+              yes: 0,
+              no: 0,
+              total: 0,
+            },
+          },
+        },
+      };
+      const mockCache = {
+        get: (key, cb) => {
+          cb(null);
+        },
+        set: (params, cb) => {
+          cb(new Error('Failed Writing to Cache'));
+        },
+      };
+      const subject = billController({
+        populationDataReader: mockPopulationDataReader,
+        countDataReader: mockCountDataReader,
+        sampler: mockSampler,
+        cache: mockCache,
+      });
+      const mockReq = {
+        query: {
+          billId: 'id',
+          state: 'CA',
+          district: 6,
+        },
+      };
+      const mockRes = {
+        send: (b) => {
+          expect(b).to.eql(data);
+        },
+      };
+      expect(mockRes.statusCode).to.eql(undefined);
+      subject.getCensusData(mockReq, mockRes);
+      done();
+    });
+    it('passes cache correct params', (done) => {
+      const mockPopulationDataReader = {
+        byDistrict: (query, callback) => {
+          return callback(null, 20);
+        },
+      };
+      const mockCountDataReader = {
+        byDistrict: (query, callback) => {
+          return callback(null, {});
+        },
+      };
+      const data = {
+        population: 20,
+        sampleSize: 0,
+        votes: {
+          yes: 0,
+          no: 0,
+          total: 0,
+        },
+        gender: {
+          male: {
+            votes: {
+              yes: 0,
+              no: 0,
+              total: 0,
+            },
+          },
+          female: {
+            votes: {
+              yes: 0,
+              no: 0,
+              total: 0,
+            },
+          },
+          nonBinary: {
+            votes: {
+              yes: 0,
+              no: 0,
+              total: 0,
+            },
+          },
+        },
+      };
+      let cacheParams;
+      const mockCache = {
+        get: (key, cb) => {
+          cb(null);
+        },
+        set: (params, cb) => {
+          cacheParams = params;
+          cb(null);
+        },
+      };
+      const subject = billController({
+        populationDataReader: mockPopulationDataReader,
+        countDataReader: mockCountDataReader,
+        sampler: mockSampler,
+        cache: mockCache,
+      });
+      const mockReq = {
+        query: {
+          billId: 'id',
+          state: 'CA',
+          district: 6,
+        },
+      };
+      const mockRes = {
+        send: (b) => {
+          expect(b).to.eql(data);
+        },
+      };
+      expect(mockRes.statusCode).to.eql(undefined);
+      subject.getCensusData(mockReq, mockRes);
+      expect(cacheParams.key).to.eql('CA-id-6');
+      expect(cacheParams.body).to.eql(data);
       done();
     });
   });

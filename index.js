@@ -7,6 +7,7 @@ const app = express();
 const config = require('./lib/config/config.js');
 const defaults = require('./lib/config/defaults.js');
 const population = require('./lib/data/population.js');
+const cache = require('./lib/cache/redis_cache.js');
 const count = require('./lib/data/count.js');
 const bill = require('./lib/controllers/bill.js');
 const port = process.env.PORT || 5000;
@@ -32,6 +33,7 @@ const billController = bill({
   populationDataReader: populationDataReader,
   countDataReader: countDataReader,
   sampler: sampler,
+  cache: cache({ client: defaults.cache() }),
 });
 
 logger.info('Initialising Server');
