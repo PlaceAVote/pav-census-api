@@ -35,8 +35,17 @@ const billController = bill({
 });
 
 logger.info('Initialising Server');
+
 app.use(sqlinjection);
 app.use(applicationLogger('combined'));
+
+const cors = (req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  next();
+};
+
+app.use(cors);
 app.get(routes.bill, (req, response) => {
   billController.getCensusData(req, response);
 });
