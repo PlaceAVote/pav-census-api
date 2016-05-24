@@ -15,13 +15,13 @@ const logger = defaults.logger().get('Application::Container');
 
 logger.info('Initialising Data Readers');
 const populationOptions = {
-  connection: defaults.census(),
+  pool: defaults.census(),
   table: config.population.table,
 };
 const populationDataReader = population(populationOptions);
 
 const userOptions = {
-  connection: defaults.user(),
+  pool: defaults.user(),
   votes: config.user.votes,
   info: config.user.info,
 };
