@@ -30,4 +30,16 @@ describe('Defaults', () => {
       expect(userPool.config.connectionConfig.password).to.eql('TEST_USER');
     });
   });
+  describe('Cache', () => {
+    it('can be instantiated from options', () => {
+      const options = {
+        host: '127.0.0.2',
+        user: 'tester',
+      };
+      const subject = defaults.cache(options);
+      expect(subject).to.not.eql(null);
+      expect(subject.options.host).to.eql('127.0.0.2');
+      expect(subject.options.user).to.eql('tester');
+    });
+  });
 });
