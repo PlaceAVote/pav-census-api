@@ -95,8 +95,13 @@ describe('Bill Controller', () => {
           callback(new Error('I cant count'));
         },
       };
+      const mockCache = {
+        get: (key, cb) => {
+          cb(null);
+        },
+      };
       const subject = billController({ populationDataReader: mockPopulationDataReader, countDataReader:
-        mockCountDataReader });
+        mockCountDataReader, cache: mockCache });
       const mockReq = {
         query: {
           billId: 'id',
@@ -124,8 +129,13 @@ describe('Bill Controller', () => {
           callback();
         },
       };
+      const mockCache = {
+        get: (key, cb) => {
+          cb(null);
+        },
+      };
       const subject = billController({ populationDataReader: mockPopulationDataReader, countDataReader:
-        mockCountDataReader });
+        mockCountDataReader, cache: mockCache });
       const mockReq = {
         query: {
           billId: 'id',
@@ -157,10 +167,16 @@ describe('Bill Controller', () => {
           return callback(null, { yes: 100, no: 30, total: 130, male: 50, maleYes: 20, maleNo: 30, female: 70, femaleYes: 20, femaleNo: 50, nonBinary: 10, nonBinaryYes: 10, nonBinaryNo: 0 });
         },
       };
+      const mockCache = {
+        get: (key, cb) => {
+          cb(null);
+        },
+      };
       const subject = billController({
         populationDataReader: mockPopulationDataReader,
         countDataReader: mockCountDataReader,
         sampler: mockSampler,
+        cache: mockCache,
       });
       const mockReq = {
         query: {
@@ -220,6 +236,11 @@ describe('Bill Controller', () => {
           return callback(null, 20);
         },
       };
+      const mockCache = {
+        get: (key, cb) => {
+          cb(null);
+        },
+      };
       const mockCountDataReader = {
         byDistrict: (query, callback) => {
           return callback(null, null);
@@ -229,6 +250,7 @@ describe('Bill Controller', () => {
         populationDataReader: mockPopulationDataReader,
         countDataReader: mockCountDataReader,
         sampler: mockSampler,
+        cache: mockCache,
       });
       const mockReq = {
         query: {
@@ -287,10 +309,16 @@ describe('Bill Controller', () => {
           return callback(null, {});
         },
       };
+      const mockCache = {
+        get: (key, cb) => {
+          cb(null);
+        },
+      };
       const subject = billController({
         populationDataReader: mockPopulationDataReader,
         countDataReader: mockCountDataReader,
         sampler: mockSampler,
+        cache: mockCache,
       });
       const mockReq = {
         query: {
@@ -337,6 +365,79 @@ describe('Bill Controller', () => {
       };
       expect(mockRes.statusCode).to.eql(undefined);
       subject.getCensusData(mockReq, mockRes);
+    });
+    it('returns object from cache when an object is found', (done) => {
+      const mockPopulationDataReader = {
+        byDistrict: (query, callback) => {
+          return callback(null, 20);
+        },
+      };
+      const mockCountDataReader = {
+        byDistrict: (query, callback) => {
+          return callback(null, {});
+        },
+      };
+      let expectedKey;
+      const data = {
+        population: 20,
+        sampleSize: 0,
+        votes: {
+          yes: 0,
+          no: 0,
+          total: 0,
+        },
+        gender: {
+          male: {
+            votes: {
+              yes: 0,
+              no: 0,
+              total: 0,
+            },
+          },
+          female: {
+            votes: {
+              yes: 0,
+              no: 0,
+              total: 0,
+            },
+          },
+          nonBinary: {
+            votes: {
+              yes: 0,
+              no: 0,
+              total: 0,
+            },
+          },
+        },
+      };
+      const mockCache = {
+        get: (key, cb) => {
+          expectedKey = key;
+          cb(data);
+        },
+      };
+      const subject = billController({
+        populationDataReader: mockPopulationDataReader,
+        countDataReader: mockCountDataReader,
+        sampler: mockSampler,
+        cache: mockCache,
+      });
+      const mockReq = {
+        query: {
+          billId: 'id',
+          state: 'CA',
+          district: 6,
+        },
+      };
+      const mockRes = {
+        send: (b) => {
+          expect(b).to.eql(data);
+        },
+      };
+      expect(mockRes.statusCode).to.eql(undefined);
+      subject.getCensusData(mockReq, mockRes);
+      expect(expectedKey).to.eql('CA-id-6');
+      done();
     });
   });
 });
