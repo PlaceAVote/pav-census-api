@@ -11,12 +11,11 @@ test:
   pre:
     - "bash ./scripts/compile.sh"
     - "gulp cover"
-  post:
-    - "bash <(curl -s https://codecov.io/bash) -t f2b4f236-b2cf-44e9-8c39-b9613e378959"
 deployment:
   development:
     branch: master
     commands:
+      - "bash <(curl -s https://codecov.io/bash) -t f2b4f236-b2cf-44e9-8c39-b9613e378959"
       - "bash ./scripts/compile.sh"
       - "rm -rf node_modules"
       - convox login $CONVOX_GRID_HOST --password $CONVOX_API_KEY
