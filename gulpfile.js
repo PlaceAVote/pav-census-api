@@ -27,7 +27,7 @@ gulp.task('check', (done) => {
 gulp.task('pre-testCoverage', () => {
   return gulp.src('lib/**/*.js')
           .pipe(istanbul({
-            includeUntested: true
+            includeUntested: true,
           }))
           .pipe(istanbul.hookRequire());
 });
