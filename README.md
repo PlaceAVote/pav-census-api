@@ -1,10 +1,13 @@
-## PlaceAVote Census API
-
-[![CircleCI](https://circleci.com/gh/PlaceAVote/pav-census-api.svg?style=svg&circle-token=76a66e65cd52cd181acc467479cb7da008044fcf)](https://circleci.com/gh/PlaceAVote/pav-census-api)
-
+### PlaceAVote Census API
 A Node Api to expose demographic data
 
 ---
+
+<p align="center">
+  <img src="https://circleci.com/gh/PlaceAVote/pav-census-api.svg?style=svg&circle-token=76a66e65cd52cd181acc467479cb7da008044fcf" ahref="https://circleci.com/gh/PlaceAVote/pav-census-api"/>
+<img src="https://img.shields.io/codecov/c/token/J2EeBYiC64/github/PlaceAVote/pav-census-api/master.svg?style=flat" ahref"https://codecov.io/github/PlaceAVote/pav-census-api?branch=master" />
+</p>
+
 
 #### Endpoints
 
