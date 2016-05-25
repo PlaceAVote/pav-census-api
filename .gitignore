@@ -4,3 +4,4 @@ scripts/*temp*
 lib/config/config.js
 /coverage
 *artillery*.json
+.idea/
