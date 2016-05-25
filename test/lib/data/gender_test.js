@@ -1,7 +1,6 @@
 'use strict';
 const expect = require('chai').expect;
 const gender = require('../../../lib/data/gender.js');
-const defaults = require('../../../lib/config/defaults.js');
 
 describe('Gender', () => {
   describe('Has functions', () => {
@@ -74,38 +73,6 @@ describe('Gender', () => {
       subject.femaleByStateAndDistrict({ state: 'CA', district: undefined }, (err, result) => {
         expect(err.message).to.eql('No District Defined');
         expect(result).to.eql(null);
-        done();
-      });
-    });
-
-    xit('calls connection with correct params', (done) => {
-      let query;
-      const connection = {
-        query: (select, callback) => {
-          query = select;
-          return callback(null);
-        },
-      };
-      const subject = gender({ connection: connection, info: 'user_info', votes: 'user_votes' });
-      subject.femaleByStateAndDistrict({ state: 'CA', district: 6, billId: 'billId' }, (err) => {
-        expect(err).to.eql(null);
-        expect(query).to.eql('');
-        done();
-      });
-    });
-    xit('live', (done) => {
-      const populationOptions = {
-        connection: defaults.user(),
-        votes: 'user_votes',
-        info: 'user_info',
-      };
-      const subject = gender(populationOptions);
-      subject.femaleByStateAndDistrict({ state: 'CA', district: 6, billId: 'hr2600-114' }, (err) => {
-        if (err) {
-          // console.log('ERROR', err);
-        } else {
-          // console.log('RESULT', result);
-        }
         done();
       });
     });
