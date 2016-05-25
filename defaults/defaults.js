@@ -1,19 +1,16 @@
 const mysql = require('mysql2');
 const winston = require('winston');
-const config = require('./config.js');
 const redis = require('redis');
 
 const defaults = {
-  cache: () => {
-    return redis.createClient(config.cache);
+  cache: (connection) => {
+    return redis.createClient(connection);
   },
-  census: (options) => {
-    const dbConnectionConfig = options || config.population.connection;
-    return mysql.createPool(dbConnectionConfig);
+  census: (connection) => {
+    return mysql.createPool(connection);
   },
-  user: (options) => {
-    const dbConnectionConfig = options || config.user.connection;
-    return mysql.createPool(dbConnectionConfig);
+  user: (connection) => {
+    return mysql.createPool(connection);
   },
   logger: () => {
     const loggers = {};
