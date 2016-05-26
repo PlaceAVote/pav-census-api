@@ -12,6 +12,9 @@ const defaults = {
   user: (connection) => {
     return mysql.createPool(connection);
   },
+  pool: (connection) => {
+    return mysql.createPool(connection);
+  },
   logger: () => {
     const loggers = {};
     return {

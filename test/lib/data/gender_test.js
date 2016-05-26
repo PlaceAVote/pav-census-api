@@ -1,78 +1,41 @@
 'use strict';
 const expect = require('chai').expect;
 const gender = require('../../../lib/data/gender.js');
+const defaults = require('../../../defaults/defaults.js');
 
 describe('Gender', () => {
   describe('Has functions', () => {
-    it('maleByStateAndDistrict', () => {
+    xit('getGenderBreakdownByAge', () => {
       const subject = gender();
-      expect(subject.maleByStateAndDistrict).to.be.a('function');
+      expect(subject.getGenderBreakdownByAge).to.be.a('function');
     });
-    it('femaleByStateAndDistrict', () => {
+    it('byMultipleAgeRanges', () => {
       const subject = gender();
-      expect(subject.femaleByStateAndDistrict).to.be.a('function');
+      expect(subject.byMultipleAgeRanges).to.be.a('function');
     });
   });
   describe('maleByStateAndDistrict', () => {
-    it('returns null if state is not defined', (done) => {
-      const subject = gender();
-      subject.maleByStateAndDistrict({ state: undefined, district: '6' }, (err, result) => {
-        expect(err.message).to.eql('No State Defined');
-        expect(result).to.eql(null);
-        done();
-      });
-    });
-
-    it('returns null if district is not defined', (done) => {
-      const subject = gender();
-      subject.maleByStateAndDistrict({ state: 'CA', district: undefined }, (err, result) => {
-        expect(err.message).to.eql('No District Defined');
-        expect(result).to.eql(null);
-        done();
-      });
-    });
-
-    it('returns null if billId is not defined', (done) => {
-      const subject = gender();
-      subject.maleByStateAndDistrict({ state: 'CA', district: 6, billId: undefined }, (err, result) => {
-        expect(err.message).to.eql('No Bill ID Defined');
-        expect(result).to.eql(null);
-        done();
-      });
-    });
-
-    xit('calls connection with correct params', (done) => {
-      let query;
+    xit('test', (done) => {
       const connection = {
-        query: (select, callback) => {
-          query = select;
-          return callback();
-        },
+        host: process.env.CONNECTION_HOST,
+        user: process.env.CONNECTION_USER,
+        password: process.env.CONNECTION_PASSWORD,
+        database: process.env.CONNECTION_DB,
+        connectionLimit: 100,
       };
-      const subject = gender({ connection: connection, table: 'census_data' });
-      subject.maleByStateAndDistrict({ state: 'CA', district: 6 }, (err) => {
-        expect(err).to.eql(null);
-        expect(query).to.eql('');
-        done();
+      const pool = defaults.pool(connection);
+      const gen = gender({
+        pool: pool,
+        census: 'census_data',
+        userInfo: 'user_info',
+        userVotes: 'user_votes',
       });
-    });
-  });
-
-  describe('femaleByStateAndDistrict', () => {
-    it('returns null if state is not defined', (done) => {
-      const subject = gender();
-      subject.femaleByStateAndDistrict({ state: undefined, district: '6' }, (err, result) => {
-        expect(err.message).to.eql('No State Defined');
-        expect(result).to.eql(null);
-        done();
-      });
-    });
-
-    it('returns null if district is not defined', (done) => {
-      const subject = gender();
-      subject.femaleByStateAndDistrict({ state: 'CA', district: undefined }, (err, result) => {
-        expect(err.message).to.eql('No District Defined');
-        expect(result).to.eql(null);
+      const params = {
+        state: 'CA',
+        district: 33,
+        billId: 'hr2-214',
+      };
+      gen.byMultipleAgeRanges(params, 'M', () => {
         done();
       });
     });
