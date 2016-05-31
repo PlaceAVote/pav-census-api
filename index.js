@@ -8,6 +8,7 @@ const defaults = require('./defaults/defaults.js');
 const population = require('./lib/data/population.js');
 const cache = require('./lib/cache/redis_cache.js');
 const count = require('./lib/data/count.js');
+const gender = require('./lib/data/gender.js');
 const bill = require('./lib/controllers/bill.js');
 const port = process.env.PORT || 5000;
 const logger = defaults.logger().get('Application::Container');
@@ -68,6 +69,13 @@ const userOptions = {
 };
 const countDataReader = count(userOptions);
 
+const genderOptions = {
+  pool: defaults.user(userDBConfig.connection),
+  votes: userDBConfig.votes,
+  info: userDBConfig.info,
+};
+const genderDataReader = gender(genderOptions);
+
 logger.info('Initialising Cache');
 const resultsCache = defaults.cache(cacheConnection);
 
@@ -75,6 +83,7 @@ logger.info('Initialising Controllers');
 const billController = bill({
   populationDataReader: populationDataReader,
   countDataReader: countDataReader,
+  genderBreakdownReader: genderDataReader,
   sampler: sampler,
   cache: cache({ client: resultsCache }),
 });

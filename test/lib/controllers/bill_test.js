@@ -95,13 +95,18 @@ describe('Bill Controller', () => {
           callback(new Error('I cant count'));
         },
       };
+      const mockGenderBreakdownReader = {
+        getGenderBreakdownForAgeRanges: (params, callback) => {
+          return callback();
+        },
+      };
       const mockCache = {
         get: (key, cb) => {
           cb(null);
         },
       };
       const subject = billController({ populationDataReader: mockPopulationDataReader, countDataReader:
-        mockCountDataReader, cache: mockCache });
+        mockCountDataReader, cache: mockCache, genderBreakdownReader: mockGenderBreakdownReader });
       const mockReq = {
         query: {
           billId: 'id',
@@ -129,13 +134,57 @@ describe('Bill Controller', () => {
           callback();
         },
       };
+      const mockGenderBreakdownReader = {
+        getGenderBreakdownForAgeRanges: (params, callback) => {
+          return callback();
+        },
+      };
       const mockCache = {
         get: (key, cb) => {
           cb(null);
         },
       };
       const subject = billController({ populationDataReader: mockPopulationDataReader, countDataReader:
-        mockCountDataReader, cache: mockCache });
+        mockCountDataReader, cache: mockCache, genderBreakdownReader: mockGenderBreakdownReader });
+      const mockReq = {
+        query: {
+          billId: 'id',
+          state: 'CA',
+          district: 6,
+        },
+      };
+      const mockRes = {
+        send: (b) => {
+          expect(b).to.eql({ message: 'An Internal Error Occurred' });
+        },
+      };
+      expect(mockRes.statusCode).to.eql(undefined);
+      subject.getCensusData(mockReq, mockRes);
+      expect(mockRes.statusCode).to.eql(500);
+    });
+    it('returns 500 if genderBreakdown has failed', () => {
+      const mockPopulationDataReader = {
+        byDistrict: (query, callback) => {
+          return callback();
+        },
+      };
+      const mockCountDataReader = {
+        byDistrict: (query, callback) => {
+          callback();
+        },
+      };
+      const mockGenderBreakdownReader = {
+        getGenderBreakdownForAgeRanges: (params, callback) => {
+          return callback(new Error('Gender Breakdown Failure'));
+        },
+      };
+      const mockCache = {
+        get: (key, cb) => {
+          cb(null);
+        },
+      };
+      const subject = billController({ populationDataReader: mockPopulationDataReader, countDataReader:
+        mockCountDataReader, cache: mockCache, genderBreakdownReader: mockGenderBreakdownReader });
       const mockReq = {
         query: {
           billId: 'id',
@@ -177,8 +226,14 @@ describe('Bill Controller', () => {
           cb();
         },
       };
+      const mockGenderBreakdownReader = {
+        getGenderBreakdownForAgeRanges: (params, callback) => {
+          return callback(null, { they: {} });
+        },
+      };
       const subject = billController({
         populationDataReader: mockPopulationDataReader,
+        genderBreakdownReader: mockGenderBreakdownReader,
         countDataReader: mockCountDataReader,
         sampler: mockSampler,
         cache: mockCache,
@@ -255,9 +310,15 @@ describe('Bill Controller', () => {
           return callback(null, null);
         },
       };
+      const mockGenderBreakdownReader = {
+        getGenderBreakdownForAgeRanges: (params, callback) => {
+          return callback(null, { female: {} });
+        },
+      };
       const subject = billController({
         populationDataReader: mockPopulationDataReader,
         countDataReader: mockCountDataReader,
+        genderBreakdownReader: mockGenderBreakdownReader,
         sampler: mockSampler,
         cache: mockCache,
       });
@@ -318,6 +379,11 @@ describe('Bill Controller', () => {
           return callback(null, {});
         },
       };
+      const mockGenderBreakdownReader = {
+        getGenderBreakdownForAgeRanges: (params, callback) => {
+          return callback(null, { male: {} });
+        },
+      };
       const mockCache = {
         get: (key, cb) => {
           cb(null);
@@ -329,6 +395,7 @@ describe('Bill Controller', () => {
       const subject = billController({
         populationDataReader: mockPopulationDataReader,
         countDataReader: mockCountDataReader,
+        genderBreakdownReader: mockGenderBreakdownReader,
         sampler: mockSampler,
         cache: mockCache,
       });
@@ -462,6 +529,11 @@ describe('Bill Controller', () => {
           return callback(null, {});
         },
       };
+      const mockGenderBreakdownReader = {
+        getGenderBreakdownForAgeRanges: (params, callback) => {
+          return callback(null, {});
+        },
+      };
       const data = {
         population: 20,
         sampleSize: 0,
@@ -507,6 +579,7 @@ describe('Bill Controller', () => {
         countDataReader: mockCountDataReader,
         sampler: mockSampler,
         cache: mockCache,
+        genderBreakdownReader: mockGenderBreakdownReader,
       });
       const mockReq = {
         query: {
@@ -535,6 +608,22 @@ describe('Bill Controller', () => {
           return callback(null, {});
         },
       };
+      const mockGenderBreakDown = {
+        male: {
+          ranges: [{ minAge: 30, maxAge: 40, votes: { total: 0, yes: 0, no: 0 } }],
+        },
+        female: {
+          ranges: [{ minAge: 30, maxAge: 40, votes: { total: 0, yes: 0, no: 0 } }],
+        },
+        they: {
+          ranges: [{ minAge: 30, maxAge: 40, votes: { total: 0, yes: 0, no: 0 } }],
+        },
+      };
+      const mockGenderBreakdownReader = {
+        getGenderBreakdownForAgeRanges: (params, callback) => {
+          return callback(null, mockGenderBreakDown);
+        },
+      };
       const data = {
         population: 20,
         sampleSize: 0,
@@ -550,6 +639,17 @@ describe('Bill Controller', () => {
               no: 0,
               total: 0,
             },
+            ranges: [
+              {
+                minAge: 30,
+                maxAge: 40,
+                votes: {
+                  total: 0,
+                  yes: 0,
+                  no: 0,
+                },
+              },
+            ],
           },
           female: {
             votes: {
@@ -557,6 +657,17 @@ describe('Bill Controller', () => {
               no: 0,
               total: 0,
             },
+            ranges: [
+              {
+                minAge: 30,
+                maxAge: 40,
+                votes: {
+                  total: 0,
+                  yes: 0,
+                  no: 0,
+                },
+              },
+            ],
           },
           nonBinary: {
             votes: {
@@ -564,6 +675,17 @@ describe('Bill Controller', () => {
               no: 0,
               total: 0,
             },
+            ranges: [
+              {
+                minAge: 30,
+                maxAge: 40,
+                votes: {
+                  total: 0,
+                  yes: 0,
+                  no: 0,
+                },
+              },
+            ],
           },
         },
       };
@@ -580,6 +702,7 @@ describe('Bill Controller', () => {
       const subject = billController({
         populationDataReader: mockPopulationDataReader,
         countDataReader: mockCountDataReader,
+        genderBreakdownReader: mockGenderBreakdownReader,
         sampler: mockSampler,
         cache: mockCache,
       });
@@ -599,6 +722,164 @@ describe('Bill Controller', () => {
       subject.getCensusData(mockReq, mockRes);
       expect(cacheParams.key).to.eql('CA-id-6');
       expect(cacheParams.body).to.eql(data);
+      done();
+    });
+    it('calls gender reader with correct params', (done) => {
+      const mockPopulationDataReader = {
+        byDistrict: (query, callback) => {
+          return callback(null, 20);
+        },
+      };
+      const mockCountDataReader = {
+        byDistrict: (query, callback) => {
+          return callback(null, {});
+        },
+      };
+      const mockGenderBreakDown = {
+        male: {
+          ranges: [{ minAge: 30, maxAge: 40, votes: { total: 0, yes: 0, no: 0 } }],
+        },
+        female: {
+          ranges: [{ minAge: 30, maxAge: 40, votes: { total: 0, yes: 0, no: 0 } }],
+        },
+        they: {
+          ranges: [{ minAge: 30, maxAge: 40, votes: { total: 0, yes: 0, no: 0 } }],
+        },
+      };
+      let calledGenderParams;
+      const mockGenderBreakdownReader = {
+        getGenderBreakdownForAgeRanges: (params, callback) => {
+          calledGenderParams = params;
+          return callback(null, mockGenderBreakDown);
+        },
+      };
+      const data = {
+        population: 20,
+        sampleSize: 0,
+        votes: {
+          yes: 0,
+          no: 0,
+          total: 0,
+        },
+        gender: {
+          male: {
+            votes: {
+              yes: 0,
+              no: 0,
+              total: 0,
+            },
+            ranges: [
+              {
+                minAge: 30,
+                maxAge: 40,
+                votes: {
+                  total: 0,
+                  yes: 0,
+                  no: 0,
+                },
+              },
+            ],
+          },
+          female: {
+            votes: {
+              yes: 0,
+              no: 0,
+              total: 0,
+            },
+            ranges: [
+              {
+                minAge: 30,
+                maxAge: 40,
+                votes: {
+                  total: 0,
+                  yes: 0,
+                  no: 0,
+                },
+              },
+            ],
+          },
+          nonBinary: {
+            votes: {
+              yes: 0,
+              no: 0,
+              total: 0,
+            },
+            ranges: [
+              {
+                minAge: 30,
+                maxAge: 40,
+                votes: {
+                  total: 0,
+                  yes: 0,
+                  no: 0,
+                },
+              },
+            ],
+          },
+        },
+      };
+      const mockCache = {
+        get: (key, cb) => {
+          cb(null);
+        },
+        set: (params, cb) => {
+          cb(null);
+        },
+      };
+      const subject = billController({
+        populationDataReader: mockPopulationDataReader,
+        countDataReader: mockCountDataReader,
+        genderBreakdownReader: mockGenderBreakdownReader,
+        sampler: mockSampler,
+        cache: mockCache,
+      });
+      const mockReq = {
+        query: {
+          billId: 'id',
+          state: 'CA',
+          district: 6,
+        },
+      };
+      const mockRes = {
+        send: (b) => {
+          expect(b).to.eql(data);
+        },
+      };
+      expect(mockRes.statusCode).to.eql(undefined);
+      subject.getCensusData(mockReq, mockRes);
+      expect(calledGenderParams.billId).to.eql('id');
+      expect(calledGenderParams.state).to.eql('CA');
+      expect(calledGenderParams.district).to.eql(6);
+      expect(calledGenderParams.ranges).to.eql([
+        {
+          min: 18,
+          max: 25,
+        },
+        {
+          min: 25,
+          max: 32,
+        },
+        {
+          min: 32,
+          max: 39,
+        },
+        {
+          min: 39,
+          max: 46,
+        },
+        {
+          min: 46,
+          max: 53,
+        },
+        {
+          min: 53,
+          max: 60,
+        },
+        {
+          min: 60,
+          max: 130,
+        },
+      ]);
       done();
     });
   });
