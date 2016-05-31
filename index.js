@@ -8,6 +8,7 @@ const defaults = require('./defaults/defaults.js');
 const population = require('./lib/data/population.js');
 const cache = require('./lib/cache/redis_cache.js');
 const count = require('./lib/data/count.js');
+const gender = require('./lib/data/gender.js');
 const bill = require('./lib/controllers/bill.js');
 const port = process.env.PORT || 5000;
 const logger = defaults.logger().get('Application::Container');
@@ -56,17 +57,24 @@ required.forEach((setting) => {
 
 logger.info('Initialising Data Readers');
 const populationOptions = {
-  pool: defaults.census(censusDBConfig.connection),
+  pool: defaults.pool(censusDBConfig.connection),
   table: censusDBConfig.table,
 };
 const populationDataReader = population(populationOptions);
 
 const userOptions = {
-  pool: defaults.user(userDBConfig.connection),
+  pool: defaults.pool(userDBConfig.connection),
   votes: userDBConfig.votes,
   info: userDBConfig.info,
 };
 const countDataReader = count(userOptions);
+
+const genderOptions = {
+  pool: defaults.pool(userDBConfig.connection),
+  votes: userDBConfig.votes,
+  info: userDBConfig.info,
+};
+const genderDataReader = gender(genderOptions);
 
 logger.info('Initialising Cache');
 const resultsCache = defaults.cache(cacheConnection);
@@ -75,6 +83,7 @@ logger.info('Initialising Controllers');
 const billController = bill({
   populationDataReader: populationDataReader,
   countDataReader: countDataReader,
+  genderBreakdownReader: genderDataReader,
   sampler: sampler,
   cache: cache({ client: resultsCache }),
 });
