@@ -175,19 +175,20 @@ describe('Gender', () => {
           max: 40,
         },
       };
-      const expectedStatement = `SELECT gender,
-      CASE WHEN vote = 1 THEN 'yes'
-      WHEN vote = 0 THEN 'no'
-      ELSE '<unknown>'
-      END as votes,
-      COUNT(vote) FROM (
-      SELECT vote, gender,
-      TIMESTAMPDIFF(YEAR, FROM_UNIXTIME(dob/1000), CURDATE()) AS 'age'
-      FROM ${options.info} AS u
-      JOIN ${options.votes} AS v ON u.user_id = v.user_id
-      WHERE u.state = ? AND u.district = ? AND v.bill_id = ?
-      HAVING age >= ${params.range.min} AND age <= ${params.range.max}
-      ) AS T GROUP BY gender, votes;`;
+      const expectedStatement =
+    `SELECT gender,
+    CASE WHEN vote = 1 THEN 'yes'
+    WHEN vote = 0 THEN 'no'
+    ELSE '<unknown>'
+    END as votes,
+    COUNT(vote) FROM (
+    SELECT vote, gender,
+    TIMESTAMPDIFF(YEAR, FROM_UNIXTIME(dob/1000), CURDATE()) AS 'age'
+    FROM ${options.info} AS u
+    JOIN ${options.votes} AS v ON u.user_id = v.user_id
+    WHERE u.state = ? AND u.district = ? AND v.bill_id = ?
+    HAVING age >= ${params.range.min} AND age <= ${params.range.max}
+    ) AS T GROUP BY gender, votes;`;
       const subject = gender(options);
       subject.getGenderBreakdownForAgeRange(params, () => {
         expect(calledStatement).to.eql(expectedStatement);
@@ -406,6 +407,262 @@ describe('Gender', () => {
         expect(result.they.total).to.eql(0);
         expect(result.they.yes).to.eql(0);
         expect(result.they.no).to.eql(0);
+        done();
+      });
+    });
+  });
+  describe('getGenderBreakdownForAgeRanges', () => {
+    it('returns error when state isnt defined', (done) => {
+      const gen = gender();
+      const params = {
+        district: 33,
+        billId: 'hr2-214',
+        gender: 'Male',
+        range: {
+          min: 9,
+          max: 11,
+        },
+      };
+      gen.getGenderBreakdownForAgeRanges(params, (err) => {
+        expect(err.message).to.eql('Must specify state in params');
+        done();
+      });
+    });
+    it('returns error when district isnt defined', (done) => {
+      const gen = gender();
+      const params = {
+        state: 'CA',
+        billId: 'hr2-214',
+        gender: 'Male',
+        range: {
+          min: 9,
+          max: 11,
+        },
+      };
+      gen.getGenderBreakdownForAgeRanges(params, (err) => {
+        expect(err.message).to.eql('Must specify district in params');
+        done();
+      });
+    });
+    it('returns error when billId isnt defined', (done) => {
+      const gen = gender();
+      const params = {
+        state: 'CA',
+        district: 4,
+        gender: 'Male',
+        ranges: [{
+          min: 9,
+          max: 11,
+        }],
+      };
+      gen.getGenderBreakdownForAgeRanges(params, (err) => {
+        expect(err.message).to.eql('Must specify bill Id in params');
+        done();
+      });
+    });
+    it('returns error when ranges isnt defined', (done) => {
+      const gen = gender();
+      const params = {
+        state: 'CA',
+        district: 4,
+        billId: 'billh42-102',
+        gender: 'Male',
+      };
+      gen.getGenderBreakdownForAgeRanges(params, (err) => {
+        expect(err.message).to.eql('Must specify ranges in params');
+        done();
+      });
+    });
+    it('returns an error when no params are defined', (done) => {
+      const gen = gender();
+      gen.getGenderBreakdownForAgeRanges(null, (err) => {
+        expect(err.message).to.eql('Must provide params');
+        done();
+      });
+    });
+    it('should call getGenderBreakdownByAge 5 times for 5 ranges', (done) => {
+      const params = {
+        state: 'CA',
+        district: 4,
+        gender: 'Male',
+        billId: 'billId-2j3',
+        ranges: [
+          {
+            min: 1,
+            max: 5,
+          },
+          {
+            min: 5,
+            max: 10,
+          },
+          {
+            min: 10,
+            max: 11,
+          },
+          {
+            min: 11,
+            max: 14,
+          },
+          {
+            min: 14,
+            max: 15,
+          },
+        ],
+      };
+      const calledParams = [];
+      const connection = {
+        execute: (statement, preparedParams, cb) => {
+          calledParams.push(statement);
+          cb(null, []);
+        },
+        release: () => {},
+      };
+      const pool = {
+        getConnection: (cb) => { cb(null, connection); },
+      };
+      const options = {
+        pool: pool,
+        info: 'user_info',
+        votes: 'user_votes',
+      };
+      const subject = gender(options);
+      subject.getGenderBreakdownForAgeRanges(params, (err, result) => {
+        expect(calledParams.length).to.eql(5);
+        expect(calledParams[0]).to.contain('HAVING age >= 1 AND age <= 5');
+        expect(calledParams[1]).to.contain('HAVING age >= 5 AND age <= 10');
+        expect(calledParams[2]).to.contain('HAVING age >= 10 AND age <= 11');
+        expect(calledParams[3]).to.contain('HAVING age >= 11 AND age <= 14');
+        expect(calledParams[4]).to.contain('HAVING age >= 14 AND age <= 15');
+        expect(result.male.ranges.length).to.eql(5);
+        expect(result.male.ranges[0].minAge).to.eql(1);
+        expect(result.male.ranges[0].maxAge).to.eql(5);
+        expect(result.male.ranges[0].votes.yes).to.eql(0);
+        expect(result.male.ranges[0].votes.no).to.eql(0);
+        expect(result.male.ranges[0].votes.total).to.eql(0);
+        expect(result.male.ranges[1].minAge).to.eql(5);
+        expect(result.male.ranges[1].maxAge).to.eql(10);
+        expect(result.male.ranges[1].votes.yes).to.eql(0);
+        expect(result.male.ranges[1].votes.no).to.eql(0);
+        expect(result.male.ranges[1].votes.total).to.eql(0);
+        expect(result.female.ranges[0].minAge).to.eql(1);
+        expect(result.female.ranges[0].minAge).to.eql(1);
+        expect(result.female.ranges[0].maxAge).to.eql(5);
+        expect(result.female.ranges[0].votes.yes).to.eql(0);
+        expect(result.female.ranges[0].votes.no).to.eql(0);
+        expect(result.female.ranges[0].votes.total).to.eql(0);
+        expect(result.female.ranges[1].minAge).to.eql(5);
+        expect(result.female.ranges[1].maxAge).to.eql(10);
+        expect(result.female.ranges[1].votes.yes).to.eql(0);
+        expect(result.female.ranges[1].votes.no).to.eql(0);
+        expect(result.female.ranges[1].votes.total).to.eql(0);
+        expect(result.female.ranges[0].maxAge).to.eql(5);
+        expect(result.female.ranges[0].votes.yes).to.eql(0);
+        expect(result.female.ranges[0].votes.no).to.eql(0);
+        expect(result.female.ranges[0].votes.total).to.eql(0);
+        expect(result.female.ranges[1].minAge).to.eql(5);
+        expect(result.female.ranges[1].maxAge).to.eql(10);
+        expect(result.female.ranges[1].votes.yes).to.eql(0);
+        expect(result.female.ranges[1].votes.no).to.eql(0);
+        expect(result.female.ranges[1].votes.total).to.eql(0);
+        expect(result.they.ranges[0].minAge).to.eql(1);
+        expect(result.they.ranges[0].minAge).to.eql(1);
+        expect(result.they.ranges[0].maxAge).to.eql(5);
+        expect(result.they.ranges[0].votes.yes).to.eql(0);
+        expect(result.they.ranges[0].votes.no).to.eql(0);
+        expect(result.they.ranges[0].votes.total).to.eql(0);
+        expect(result.they.ranges[1].minAge).to.eql(5);
+        expect(result.they.ranges[1].maxAge).to.eql(10);
+        expect(result.they.ranges[1].votes.yes).to.eql(0);
+        expect(result.they.ranges[1].votes.no).to.eql(0);
+        expect(result.they.ranges[1].votes.total).to.eql(0);
+        expect(result.they.ranges[0].maxAge).to.eql(5);
+        expect(result.they.ranges[0].votes.yes).to.eql(0);
+        expect(result.they.ranges[0].votes.no).to.eql(0);
+        expect(result.they.ranges[0].votes.total).to.eql(0);
+        expect(result.they.ranges[1].minAge).to.eql(5);
+        expect(result.they.ranges[1].maxAge).to.eql(10);
+        expect(result.they.ranges[1].votes.yes).to.eql(0);
+        expect(result.they.ranges[1].votes.no).to.eql(0);
+        expect(result.they.ranges[1].votes.total).to.eql(0);
+        expect(result.female.ranges.length).to.eql(5);
+        expect(result.they.ranges.length).to.eql(5);
+        done();
+      });
+    });
+    it('returns an error from the database should not bubble up and not break construction of stats', (done) => {
+      const params = {
+        state: 'CA',
+        district: 4,
+        gender: 'Male',
+        billId: 'billId-2j3',
+        ranges: [
+          {
+            min: 1,
+            max: 5,
+          },
+        ],
+      };
+      const connection = {
+        execute: (statement, preparedParams, cb) => {
+          cb(new Error('OH OH'), null);
+        },
+        release: () => {},
+      };
+      const pool = {
+        getConnection: (cb) => { cb(null, connection); },
+      };
+      const options = {
+        pool: pool,
+        info: 'user_info',
+        votes: 'user_votes',
+      };
+      const subject = gender(options);
+      subject.getGenderBreakdownForAgeRanges(params, (err, result) => {
+        expect(err).to.eql(null);
+        expect(result.male.ranges.length).to.eql(1);
+        expect(result.female.ranges.length).to.eql(1);
+        expect(result.they.ranges.length).to.eql(1);
+        done();
+      });
+    });
+    it('returns an error from the database should not bubble up and not break construction of stats', (done) => {
+      const params = {
+        state: 'CA',
+        district: 4,
+        gender: 'Male',
+        billId: 'billId-2j3',
+        ranges: [
+          {
+            min: 1,
+          },
+        ],
+      };
+      const connection = {
+        execute: (statement, preparedParams, cb) => {
+          cb(new Error('OH OH'), null);
+        },
+        release: () => {},
+      };
+      const pool = {
+        getConnection: (cb) => { cb(null, connection); },
+      };
+      const options = {
+        pool: pool,
+        info: 'user_info',
+        votes: 'user_votes',
+      };
+      const subject = gender(options);
+      subject.getGenderBreakdownForAgeRanges(params, (err, result) => {
+        expect(err).to.eql(null);
+        expect(result.male.ranges.length).to.eql(1);
+        expect(result.male.ranges[0].minAge).to.eql(0);
+        expect(result.male.ranges[0].maxAge).to.eql(0);
+        expect(result.male.ranges[0].votes.total).to.eql(0);
+        expect(result.male.ranges[0].votes.yes).to.eql(0);
+        expect(result.male.ranges[0].votes.no).to.eql(0);
+        expect(result.male.ranges.length).to.eql(1);
+        expect(result.female.ranges.length).to.eql(1);
+        expect(result.they.ranges.length).to.eql(1);
         done();
       });
     });
