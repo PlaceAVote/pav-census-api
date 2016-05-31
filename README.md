@@ -5,6 +5,7 @@ A Node Api to expose demographic data
 
 <p align="center">
   <img src="https://circleci.com/gh/PlaceAVote/pav-census-api.svg?style=svg&circle-token=76a66e65cd52cd181acc467479cb7da008044fcf" ahref="https://circleci.com/gh/PlaceAVote/pav-census-api"/>
+  <img src="https://img.shields.io/circleci/token/76a66e65cd52cd181acc467479cb7da008044fcf/project/BrightFlair/PHP.Gt/master.svg" ahref="https://circleci.com/gh/PlaceAVote/pav-census-api"/>
 <img src="https://img.shields.io/codecov/c/token/J2EeBYiC64/github/PlaceAVote/pav-census-api/master.svg?style=flat" ahref"https://codecov.io/github/PlaceAVote/pav-census-api?branch=master" />
 </p>
 
@@ -49,7 +50,6 @@ _Request_
   * district
 
 _Response_
- // Work in Progress - Example Response
 ```
   {
     population: 4815,
@@ -95,7 +95,25 @@ _Response_
             }
           }
         ]
-      }
+      },
+      nonBinary: {
+        votes: {
+          total: 0,
+          yes: 0,
+          no: 0,
+        },
+        ranges: [
+          {
+            minAge: 0,
+            maxAge: 0,
+            votes: {
+              total: 0,
+              yes: 0,
+              no: 0,
+            }
+          }
+        ]
+      },
     }
   }
 ```
