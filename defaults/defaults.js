@@ -6,12 +6,6 @@ const defaults = {
   cache: (connection) => {
     return redis.createClient(connection);
   },
-  census: (connection) => {
-    return mysql.createPool(connection);
-  },
-  user: (connection) => {
-    return mysql.createPool(connection);
-  },
   pool: (connection) => {
     return mysql.createPool(connection);
   },

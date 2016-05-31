@@ -57,20 +57,20 @@ required.forEach((setting) => {
 
 logger.info('Initialising Data Readers');
 const populationOptions = {
-  pool: defaults.census(censusDBConfig.connection),
+  pool: defaults.pool(censusDBConfig.connection),
   table: censusDBConfig.table,
 };
 const populationDataReader = population(populationOptions);
 
 const userOptions = {
-  pool: defaults.user(userDBConfig.connection),
+  pool: defaults.pool(userDBConfig.connection),
   votes: userDBConfig.votes,
   info: userDBConfig.info,
 };
 const countDataReader = count(userOptions);
 
 const genderOptions = {
-  pool: defaults.user(userDBConfig.connection),
+  pool: defaults.pool(userDBConfig.connection),
   votes: userDBConfig.votes,
   info: userDBConfig.info,
 };
