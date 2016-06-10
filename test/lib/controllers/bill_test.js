@@ -853,31 +853,19 @@ describe('Bill Controller', () => {
       expect(calledGenderParams.ranges).to.eql([
         {
           min: 18,
-          max: 25,
+          max: 30,
         },
         {
-          min: 25,
-          max: 32,
+          min: 30,
+          max: 45,
         },
         {
-          min: 32,
-          max: 39,
-        },
-        {
-          min: 39,
-          max: 46,
-        },
-        {
-          min: 46,
-          max: 53,
-        },
-        {
-          min: 53,
+          min: 45,
           max: 60,
         },
         {
           min: 60,
-          max: 130,
+          max: 120,
         },
       ]);
       done();
