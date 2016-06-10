@@ -121,7 +121,7 @@ describe('Cache', () => {
       const subject = cache({ client: client });
       subject.set({ body: { id: 'key' }, key: 'key' }, (err) => {
         expect(err).to.eql(null);
-        expect(calledParams[1]).to.eql(1800);
+        expect(calledParams[1]).to.eql(300);
         done();
       });
     });
