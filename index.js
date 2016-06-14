@@ -9,6 +9,8 @@ const population = require('./lib/data/population.js');
 const cache = require('./lib/cache/redis_cache.js');
 const count = require('./lib/data/count.js');
 const gender = require('./lib/data/gender.js');
+const districtLeague = require('./lib/data/district_league.js');
+const districtController = require('./lib/controllers/district_league.js');
 const bill = require('./lib/controllers/bill.js');
 const port = process.env.PORT || 5000;
 const logger = defaults.logger().get('Application::Container');
@@ -76,6 +78,15 @@ const genderOptions = {
 };
 const genderDataReader = gender(genderOptions);
 
+
+const districtOptions = {
+  pool: defaults.pool(userDBConfig.connection),
+  votes: userDBConfig.votes,
+  info: userDBConfig.info,
+};
+
+const districtDataReader = districtLeague(districtOptions);
+
 logger.info('Initialising Cache');
 const resultsCache = defaults.cache(cacheConnection);
 
@@ -85,6 +96,11 @@ const billController = bill({
   countDataReader: countDataReader,
   genderBreakdownReader: genderDataReader,
   sampler: sampler,
+  cache: cache({ client: resultsCache }),
+});
+
+const districtLeagueController = districtController({
+  dataLoader: districtDataReader,
   cache: cache({ client: resultsCache }),
 });
 
@@ -102,6 +118,10 @@ const cors = (req, res, next) => {
 app.use(cors);
 app.get(routes.bill, (req, response) => {
   billController.getCensusData(req, response);
+});
+
+app.get(routes.districtLeague, (req, response) => {
+  districtLeagueController.handleLeagueRequest(req, response);
 });
 
 app.get(routes.health, (req, response) => {

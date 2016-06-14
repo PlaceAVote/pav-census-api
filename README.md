@@ -28,6 +28,36 @@ _Response_
 
 ---
 
+_Request_
+
+```
+  /districtleage?billId={billId}
+```
+
+**Path**
+
+```
+  /districtleage
+```
+
+**QueryParams**
+
+  * billId
+
+_Response_
+```
+  {
+    total: 15,
+    league: [
+      { state: 'CA', district: 33, hits: 10 },
+      { state: 'NY', district: 1, hits: 2 },
+      { state: 'NY', district: 23, hits: 3 },
+    ]
+  }
+```
+
+---
+
 ##### Demographic Data For a Bill:
 
 _Request_
