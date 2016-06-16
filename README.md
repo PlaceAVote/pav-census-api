@@ -49,9 +49,9 @@ _Response_
   {
     total: 15,
     league: [
-      { state: 'CA', district: 33, hits: 10 },
-      { state: 'NY', district: 1, hits: 2 },
-      { state: 'NY', district: 23, hits: 3 },
+      { state: 'CA', district: 33, hits: 10, population: 10000, sampleSize: 390 },
+      { state: 'NY', district: 1, hits: 2, population:: 90000, sampleSize: 390 },
+      { state: 'NY', district: 23, hits: 3, population: 90000, sampleSize: 390 },
     ]
   }
 ```
@@ -90,6 +90,8 @@ _Response_
     },
     gender: {
       male: {
+        population: 500,
+        sampleSize: 10,
         votes: {
           total: 1600,
           yes: 800,
@@ -99,6 +101,8 @@ _Response_
           {
             minAge: 18,
             maxAge: 24,
+            population: 500,
+            sampleSize: 10,
             votes: {
               total: 100,
               yes: 30,
@@ -108,6 +112,8 @@ _Response_
         ]
       },
       female: {
+        population: 500,
+        sampleSize: 10,
         votes: {
           total: 850,
           yes: 600,
@@ -117,6 +123,8 @@ _Response_
           {
             minAge: 45,
             maxAge: 60,
+            population: 500,
+            sampleSize: 10,
             votes: {
               total: 100,
               yes: 90,
@@ -125,7 +133,7 @@ _Response_
           }
         ]
       },
-      nonBinary: {
+      nonBinary: { // N.B nonBinary gender will not have population or sampleSize data.
         votes: {
           total: 0,
           yes: 0,
