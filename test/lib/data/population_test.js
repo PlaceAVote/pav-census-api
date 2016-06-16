@@ -377,7 +377,7 @@ describe('Population', () => {
         },
       };
       const subject = population({ pool: pool, table: 'census_data' });
-      subject.byDistrictGenderAndRange({ state: 'CA', district: 6, gender: 'M', range: { lowAge: 6, highAge: 20 } }, (err, result) => {
+      subject.byDistrictGenderAndRange({ state: 'CA', district: 6, gender: 'M', range: { lowAge: 6, highAge: 20 } }, (err) => {
         expect(err).to.eql(null);
         expect(string).to.eql('SELECT SUM(population) FROM census_data WHERE state = ? AND district = ? AND gender = ? AND age_low >= ? AND age_high <= ? AND age_high > 0');
         expect(prepared.length).to.eql(5);
@@ -417,7 +417,7 @@ describe('Population', () => {
         },
       };
       const subject = population({ pool: pool, table: 'census_data' });
-      subject.byDistrictGenderAndRange({ state: 'CA', district: 6, gender: 'M', range: { lowAge: 6, highAge: 20 } }, (err, result) => {
+      subject.byDistrictGenderAndRange({ state: 'CA', district: 6, gender: 'M', range: { lowAge: 6, highAge: 20 } }, (err) => {
         expect(err.message).to.eql('Connection Pool Error');
         done();
       });
