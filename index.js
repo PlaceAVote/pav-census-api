@@ -100,7 +100,9 @@ const billController = bill({
 });
 
 const districtLeagueController = districtController({
+  populationLoader: populationDataReader,
   dataLoader: districtDataReader,
+  sampler: sampler,
   cache: cache({ client: resultsCache }),
 });
 

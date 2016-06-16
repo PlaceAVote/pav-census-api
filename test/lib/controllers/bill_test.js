@@ -89,6 +89,9 @@ describe('Bill Controller', () => {
         byDistrict: (query, callback) => {
           return callback();
         },
+        byDistrictAndGender: (query, callback) => {
+          return callback();
+        },
       };
       const mockCountDataReader = {
         byDistrict: (query, callback) => {
@@ -106,7 +109,106 @@ describe('Bill Controller', () => {
         },
       };
       const subject = billController({ populationDataReader: mockPopulationDataReader, countDataReader:
-        mockCountDataReader, cache: mockCache, genderBreakdownReader: mockGenderBreakdownReader });
+        mockCountDataReader, cache: mockCache, genderBreakdownReader: mockGenderBreakdownReader, sampler: mockSampler });
+      const mockReq = {
+        query: {
+          billId: 'id',
+          state: 'CA',
+          district: 6,
+        },
+      };
+      const mockRes = {
+        send: (b) => {
+          expect(b).to.eql({ message: 'An Internal Error Occurred' });
+        },
+      };
+      expect(mockRes.statusCode).to.eql(undefined);
+      subject.getCensusData(mockReq, mockRes);
+      expect(mockRes.statusCode).to.eql(500);
+    });
+
+    it('returns 500 if population of gender ranges data has failed', () => {
+      const mockPopulationDataReader = {
+        byDistrict: (query, callback) => {
+          return callback();
+        },
+        byDistrictAndGender: (query, callback) => {
+          return callback();
+        },
+        byDistrictGenderAndRange: (query, callback) => {
+          return callback(new Error('Gender Range Population Error'));
+        },
+      };
+      const mockCountDataReader = {
+        byDistrict: (query, callback) => {
+          callback();
+        },
+      };
+      const mockGenderBreakDown = {
+        male: {
+          ranges: [{ minAge: 30, maxAge: 40, votes: { total: 0, yes: 0, no: 0 } }],
+        },
+        female: {
+          ranges: [{ minAge: 30, maxAge: 40, votes: { total: 0, yes: 0, no: 0 } }],
+        },
+        they: {
+          ranges: [{ minAge: 30, maxAge: 40, votes: { total: 0, yes: 0, no: 0 } }],
+        },
+      };
+      const mockGenderBreakdownReader = {
+        getGenderBreakdownForAgeRanges: (params, callback) => {
+          return callback(null, mockGenderBreakDown);
+        },
+      };
+      const mockCache = {
+        get: (key, cb) => {
+          cb(null);
+        },
+      };
+      const subject = billController({ populationDataReader: mockPopulationDataReader, countDataReader:
+        mockCountDataReader, cache: mockCache, genderBreakdownReader: mockGenderBreakdownReader, sampler: mockSampler });
+      const mockReq = {
+        query: {
+          billId: 'id',
+          state: 'CA',
+          district: 6,
+        },
+      };
+      const mockRes = {
+        send: (b) => {
+          expect(b).to.eql({ message: 'An Internal Error Occurred' });
+        },
+      };
+      expect(mockRes.statusCode).to.eql(undefined);
+      subject.getCensusData(mockReq, mockRes);
+      expect(mockRes.statusCode).to.eql(500);
+    });
+    it('returns 500 if population of gender data has failed', () => {
+      const mockPopulationDataReader = {
+        byDistrict: (query, callback) => {
+          return callback();
+        },
+        byDistrictAndGender: (query, callback) => {
+          return callback(new Error('Gender Population Error'));
+        },
+      };
+      const mockCountDataReader = {
+        byDistrict: (query, callback) => {
+          callback();
+        },
+      };
+      const mockGenderBreakdownReader = {
+        getGenderBreakdownForAgeRanges: (params, callback) => {
+          return callback();
+        },
+      };
+      const mockCache = {
+        get: (key, cb) => {
+          cb(null);
+        },
+      };
+      const subject = billController({ populationDataReader: mockPopulationDataReader, countDataReader:
+        mockCountDataReader, cache: mockCache, genderBreakdownReader: mockGenderBreakdownReader, sampler: mockSampler });
       const mockReq = {
         query: {
           billId: 'id',
@@ -128,6 +230,9 @@ describe('Bill Controller', () => {
         byDistrict: (query, callback) => {
           return callback(new Error('Population Error'));
         },
+        byDistrictAndGender: (query, callback) => {
+          return callback(null);
+        },
       };
       const mockCountDataReader = {
         byDistrict: (query, callback) => {
@@ -145,7 +250,7 @@ describe('Bill Controller', () => {
         },
       };
       const subject = billController({ populationDataReader: mockPopulationDataReader, countDataReader:
-        mockCountDataReader, cache: mockCache, genderBreakdownReader: mockGenderBreakdownReader });
+        mockCountDataReader, cache: mockCache, genderBreakdownReader: mockGenderBreakdownReader, sampler: mockSampler });
       const mockReq = {
         query: {
           billId: 'id',
@@ -167,6 +272,9 @@ describe('Bill Controller', () => {
         byDistrict: (query, callback) => {
           return callback();
         },
+        byDistrictAndGender: (query, callback) => {
+          return callback(null);
+        },
       };
       const mockCountDataReader = {
         byDistrict: (query, callback) => {
@@ -184,7 +292,7 @@ describe('Bill Controller', () => {
         },
       };
       const subject = billController({ populationDataReader: mockPopulationDataReader, countDataReader:
-        mockCountDataReader, cache: mockCache, genderBreakdownReader: mockGenderBreakdownReader });
+        mockCountDataReader, cache: mockCache, genderBreakdownReader: mockGenderBreakdownReader, sampler: mockSampler });
       const mockReq = {
         query: {
           billId: 'id',
@@ -207,6 +315,9 @@ describe('Bill Controller', () => {
         byDistrict: (query, callback) => {
           receivedPopQuery = query;
           return callback(null, 20);
+        },
+        byDistrictAndGender: (query, callback) => {
+          return callback(null, 10);
         },
       };
       let receivedCountQuery;
@@ -257,6 +368,9 @@ describe('Bill Controller', () => {
             },
             gender: {
               male: {
+                population: 10,
+                sampleSize: 0,
+                ranges: [],
                 votes: {
                   yes: 20,
                   no: 30,
@@ -264,6 +378,9 @@ describe('Bill Controller', () => {
                 },
               },
               female: {
+                population: 10,
+                sampleSize: 0,
+                ranges: [],
                 votes: {
                   yes: 20,
                   no: 50,
@@ -295,6 +412,9 @@ describe('Bill Controller', () => {
       const mockPopulationDataReader = {
         byDistrict: (query, callback) => {
           return callback(null, 20);
+        },
+        byDistrictAndGender: (query, callback) => {
+          return callback(null, 10);
         },
       };
       const mockCache = {
@@ -341,6 +461,9 @@ describe('Bill Controller', () => {
             },
             gender: {
               male: {
+                population: 10,
+                sampleSize: 0,
+                ranges: [],
                 votes: {
                   yes: 0,
                   no: 0,
@@ -348,6 +471,9 @@ describe('Bill Controller', () => {
                 },
               },
               female: {
+                population: 10,
+                sampleSize: 0,
+                ranges: [],
                 votes: {
                   yes: 0,
                   no: 0,
@@ -372,6 +498,9 @@ describe('Bill Controller', () => {
       const mockPopulationDataReader = {
         byDistrict: (query, callback) => {
           return callback(null, 20);
+        },
+        byDistrictAndGender: (query, callback) => {
+          return callback(null, 10);
         },
       };
       const mockCountDataReader = {
@@ -418,6 +547,9 @@ describe('Bill Controller', () => {
             },
             gender: {
               male: {
+                population: 10,
+                sampleSize: 0,
+                ranges: [],
                 votes: {
                   yes: 0,
                   no: 0,
@@ -425,6 +557,9 @@ describe('Bill Controller', () => {
                 },
               },
               female: {
+                population: 10,
+                sampleSize: 0,
+                ranges: [],
                 votes: {
                   yes: 0,
                   no: 0,
@@ -450,6 +585,9 @@ describe('Bill Controller', () => {
         byDistrict: (query, callback) => {
           return callback(null, 20);
         },
+        byDistrictAndGender: (query, callback) => {
+          return callback(null, 10);
+        },
       };
       const mockCountDataReader = {
         byDistrict: (query, callback) => {
@@ -467,6 +605,9 @@ describe('Bill Controller', () => {
         },
         gender: {
           male: {
+            population: 10,
+            sampleSize: 0,
+            ranges: [],
             votes: {
               yes: 0,
               no: 0,
@@ -474,6 +615,9 @@ describe('Bill Controller', () => {
             },
           },
           female: {
+            population: 10,
+            sampleSize: 0,
+            ranges: [],
             votes: {
               yes: 0,
               no: 0,
@@ -523,6 +667,12 @@ describe('Bill Controller', () => {
         byDistrict: (query, callback) => {
           return callback(null, 20);
         },
+        byDistrictAndGender: (query, callback) => {
+          return callback(null, 10);
+        },
+        byDistrictGenderAndRange: (query, callback) => {
+          return callback(null, 4);
+        },
       };
       const mockCountDataReader = {
         byDistrict: (query, callback) => {
@@ -544,6 +694,9 @@ describe('Bill Controller', () => {
         },
         gender: {
           male: {
+            population: 10,
+            sampleSize: 0,
+            ranges: [],
             votes: {
               yes: 0,
               no: 0,
@@ -551,6 +704,9 @@ describe('Bill Controller', () => {
             },
           },
           female: {
+            population: 10,
+            sampleSize: 0,
+            ranges: [],
             votes: {
               yes: 0,
               no: 0,
@@ -602,6 +758,12 @@ describe('Bill Controller', () => {
         byDistrict: (query, callback) => {
           return callback(null, 20);
         },
+        byDistrictAndGender: (query, callback) => {
+          return callback(null, 10);
+        },
+        byDistrictGenderAndRange: (query, callback) => {
+          return callback(null, 4);
+        },
       };
       const mockCountDataReader = {
         byDistrict: (query, callback) => {
@@ -634,6 +796,8 @@ describe('Bill Controller', () => {
         },
         gender: {
           male: {
+            population: 10,
+            sampleSize: 0,
             votes: {
               yes: 0,
               no: 0,
@@ -641,6 +805,8 @@ describe('Bill Controller', () => {
             },
             ranges: [
               {
+                population: 4,
+                sampleSize: 0,
                 minAge: 30,
                 maxAge: 40,
                 votes: {
@@ -652,6 +818,8 @@ describe('Bill Controller', () => {
             ],
           },
           female: {
+            population: 10,
+            sampleSize: 0,
             votes: {
               yes: 0,
               no: 0,
@@ -659,6 +827,8 @@ describe('Bill Controller', () => {
             },
             ranges: [
               {
+                population: 4,
+                sampleSize: 0,
                 minAge: 30,
                 maxAge: 40,
                 votes: {
@@ -729,6 +899,12 @@ describe('Bill Controller', () => {
         byDistrict: (query, callback) => {
           return callback(null, 20);
         },
+        byDistrictAndGender: (query, callback) => {
+          return callback(null, 10);
+        },
+        byDistrictGenderAndRange: (query, callback) => {
+          return callback(null, 10);
+        },
       };
       const mockCountDataReader = {
         byDistrict: (query, callback) => {
@@ -763,6 +939,8 @@ describe('Bill Controller', () => {
         },
         gender: {
           male: {
+            population: 10,
+            sampleSize: 0,
             votes: {
               yes: 0,
               no: 0,
@@ -770,6 +948,8 @@ describe('Bill Controller', () => {
             },
             ranges: [
               {
+                population: 10,
+                sampleSize: 0,
                 minAge: 30,
                 maxAge: 40,
                 votes: {
@@ -781,6 +961,8 @@ describe('Bill Controller', () => {
             ],
           },
           female: {
+            population: 10,
+            sampleSize: 0,
             votes: {
               yes: 0,
               no: 0,
@@ -788,6 +970,8 @@ describe('Bill Controller', () => {
             },
             ranges: [
               {
+                population: 10,
+                sampleSize: 0,
                 minAge: 30,
                 maxAge: 40,
                 votes: {
