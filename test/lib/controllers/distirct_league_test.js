@@ -281,7 +281,7 @@ describe('DistrictLeagueController', () => {
         },
       };
       let expectedSampleParams;
-      const mockSampler = {
+      const mockPopulationSampler = {
         population: (pop) => {
           expectedSampleParams = pop;
           return 1;
@@ -291,14 +291,14 @@ describe('DistrictLeagueController', () => {
       const mockPopulationLoader = {
         byDistrict: (params, callback) => {
           calledCount.push(params);
-          callback(null, "100");
+          callback(null, '100');
         },
       };
       const options = {
         cache: mockCache,
         dataLoader: mockDistrictLoader,
         populationLoader: mockPopulationLoader,
-        sampler: mockSampler,
+        sampler: mockPopulationSampler,
       };
       const subject = districtLeagueController(options);
       subject.handleLeagueRequest(mockReq, mockRes);
