@@ -2,6 +2,8 @@ const expect = require('chai').expect;
 const districtLeagueController = require('../../../lib/controllers/district_league.js');
 
 describe('DistrictLeagueController', () => {
+  // generic mock sampler.
+  const mockSampler = { population: () => { return 1; } };
   describe('Has Properties', () => {
     it('handleLeagueRequest', () => {
       const ctrl = districtLeagueController();
@@ -122,6 +124,11 @@ describe('DistrictLeagueController', () => {
           expectedResult = b;
         },
       };
+      const mockPopulationLoader = {
+        byDistrict: (params, callback) => {
+          callback(null, 10);
+        },
+      };
       const mockDistrictLoader = {
         getLeague: (params, cb) => {
           cb(null, data);
@@ -130,6 +137,8 @@ describe('DistrictLeagueController', () => {
       const options = {
         cache: mockCache,
         dataLoader: mockDistrictLoader,
+        populationLoader: mockPopulationLoader,
+        sampler: mockSampler,
       };
       const subject = districtLeagueController(options);
       subject.handleLeagueRequest(mockReq, mockRes);
@@ -163,6 +172,11 @@ describe('DistrictLeagueController', () => {
           expectedResult = b;
         },
       };
+      const mockPopulationLoader = {
+        byDistrict: (params, callback) => {
+          callback(null, 10);
+        },
+      };
       const mockDistrictLoader = {
         getLeague: (params, cb) => {
           cb(null, data);
@@ -171,10 +185,127 @@ describe('DistrictLeagueController', () => {
       const options = {
         cache: mockCache,
         dataLoader: mockDistrictLoader,
+        populationLoader: mockPopulationLoader,
+        sampler: mockSampler,
       };
       const subject = districtLeagueController(options);
       subject.handleLeagueRequest(mockReq, mockRes);
       expect(expectedResult).to.eql(data);
+    });
+
+    it('returns an internal service error if population data loader fails', () => {
+      const mockReq = {
+        query: {
+          billId: 'hr2-123',
+        },
+      };
+      const data = {
+        total: 15,
+        league: [
+          { state: 'CA', district: 3, hits: 15 },
+        ],
+      };
+      const mockCache = {
+        get: (key, cb) => {
+          cb(null);
+        },
+        set: (body, cb) => {
+          cb(new Error('Cache Issue'));
+        },
+      };
+      let actualResult;
+      const mockRes = {
+        send: (b) => {
+          actualResult = b;
+        },
+      };
+      const mockDistrictLoader = {
+        getLeague: (params, cb) => {
+          cb(null, data);
+        },
+      };
+      const mockPopulationLoader = {
+        byDistrict: (params, callback) => {
+          return callback(new Error('Population Error'), null);
+        },
+      };
+      const options = {
+        cache: mockCache,
+        dataLoader: mockDistrictLoader,
+        populationLoader: mockPopulationLoader,
+        sampler: mockSampler,
+      };
+      const subject = districtLeagueController(options);
+      subject.handleLeagueRequest(mockReq, mockRes);
+      expect(actualResult).to.eql({ message: 'Internal Server Error' });
+      expect(mockRes.statusCode).to.eql(500);
+    });
+
+    it('calls both data loaders and returns a populated result', () => {
+      const mockReq = {
+        query: {
+          billId: 'hr2-123',
+        },
+      };
+      const data = {
+        total: 15,
+        league: [
+          { state: 'CA', district: 3, hits: 15 },
+        ],
+      };
+      const expectedResult = {
+        total: 15,
+        league: [
+          { state: 'CA', district: 3, hits: 15, population: 100, sampleSize: 1 },
+        ],
+      };
+      const mockCache = {
+        get: (key, cb) => {
+          cb(null);
+        },
+        set: (body, cb) => {
+          cb(new Error('Cache Issue'));
+        },
+      };
+      let actualResult;
+      const mockRes = {
+        send: (b) => {
+          actualResult = b;
+        },
+      };
+      let dataLoaded;
+      const mockDistrictLoader = {
+        getLeague: (params, cb) => {
+          dataLoaded = true;
+          cb(null, data);
+        },
+      };
+      let expectedSampleParams;
+      const mockSampler = {
+        population: (pop) => {
+          expectedSampleParams = pop;
+          return 1;
+        },
+      };
+      const calledCount = [];
+      const mockPopulationLoader = {
+        byDistrict: (params, callback) => {
+          calledCount.push(params);
+          callback(null, "100");
+        },
+      };
+      const options = {
+        cache: mockCache,
+        dataLoader: mockDistrictLoader,
+        populationLoader: mockPopulationLoader,
+        sampler: mockSampler,
+      };
+      const subject = districtLeagueController(options);
+      subject.handleLeagueRequest(mockReq, mockRes);
+      expect(expectedResult).to.eql(actualResult);
+      expect(dataLoaded).to.eql(true);
+      expect(calledCount.length).to.eql(1);
+      expect(expectedSampleParams).to.eql({ population: 100 });
     });
   });
 });
