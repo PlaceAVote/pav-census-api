@@ -123,6 +123,26 @@ describe('Population', () => {
       });
     });
 
+    it('Can handle district number being 0', (done) => {
+      const pool = {
+        getConnection: (cb) => {
+          const connection = {
+            execute: (statement, preparedParams, ecb) => {
+              ecb(null, [{}]);
+            },
+            release: () => {},
+          };
+          cb(null, connection);
+        },
+      };
+      const subject = population({ pool: pool, table: 'census_data' });
+      subject.byDistrict({ state: 'CA', district: 0 }, (err, result) => {
+        expect(err).to.eql(null);
+        expect(result).to.eql(0);
+        done();
+      });
+    });
+
     it('Returns 0 if results are found but no sum property is available', (done) => {
       const pool = {
         getConnection: (cb) => {

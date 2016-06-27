@@ -44,7 +44,7 @@ describe('District League', () => {
         expect(err).to.eql(null);
         expect(actualParams.length).to.eql(1);
         expect(actualParams[0]).to.eql('hr2014');
-        expect(actualStatement).to.eql('SELECT state, district, MAX(matchCount) as hits FROM ( SELECT user_info.state as state, user_info.district as district, COUNT(*) as matchCount FROM user_info INNER JOIN user_votes ON user_info.user_id=user_votes.user_id WHERE bill_id=? AND user_info.state is NOT NULL GROUP BY user_info.state, user_info.district) g GROUP BY state;');
+        expect(actualStatement).to.eql('SELECT state, district, MAX(matchCount) as hits FROM ( SELECT user_info.state as state, user_info.district as district, COUNT(*) as matchCount FROM user_info INNER JOIN user_votes ON user_info.user_id=user_votes.user_id WHERE bill_id=? AND user_info.state is NOT NULL AND user_info.district is NOT NULL GROUP BY user_info.state, user_info.district) g GROUP BY state;');
         done();
       });
     });
