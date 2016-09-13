@@ -1,5 +1,7 @@
 web:
   build: .
+  label:
+    -convox.port.443.protocol=https
   ports:
-  - 80:5000
-  - 443:5000
+    - 80:5000
+    - 443:5000
